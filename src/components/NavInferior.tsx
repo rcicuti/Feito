@@ -1,8 +1,9 @@
-export type Aba = 'hoje' | 'perfil'
+export type Aba = 'hoje' | 'grupos' | 'perfil'
 
 export function NavInferior({ aba, onMudar }: { aba: Aba; onMudar: (a: Aba) => void }) {
   const itens: { id: Aba; emoji: string; rotulo: string }[] = [
     { id: 'hoje', emoji: '✅', rotulo: 'Hoje' },
+    { id: 'grupos', emoji: '👥', rotulo: 'Grupos' },
     { id: 'perfil', emoji: '🌱', rotulo: 'Perfil' },
   ]
   return (

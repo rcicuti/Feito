@@ -6,6 +6,7 @@ export interface Profile {
   display_name: string | null
   birth_date: string | null
   onboarding_done: boolean
+  hide_rankings: boolean
 }
 
 export interface Passo {

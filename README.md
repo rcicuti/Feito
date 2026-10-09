@@ -1,4 +1,4 @@
-# Feito! — Etapas 1 e 2 (base, tela Hoje, pontos e conquistas)
+# Feito! — Etapas 1 a 3 (base, pontos, grupos)
 
 Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 
@@ -14,7 +14,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 ## Como configurar
 
 1. **Supabase**: crie um projeto em supabase.com.
-2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql` e `0003_resetar_conta.sql` (cada uma uma vez só).
+2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` (cada uma uma vez só).
 3. Em **Project Settings → API**, copie a *Project URL* e a chave *anon public*.
 4. Copie `.env.example` para `.env` e preencha as duas variáveis.
 5. **Login com e-mail**: em *Authentication → URL Configuration*, ponha a URL do app em *Site URL* e em *Redirect URLs* (ex.: `http://localhost:5173` e a URL publicada).
@@ -44,4 +44,13 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 - Fotos ficam no bucket privado `provas`, em pasta `<id-da-pessoa>/...`, com política por pasta. Para exibir foto no futuro, use URL assinada (`createSignedUrl`).
 
 ## Ainda não está nesta etapa (de propósito)
-Grupos e feed (Etapa 3); terapeuta (4); notificações, configurações e excluir conta (5).
+Terapeuta (4); notificações, configurações e excluir conta (5).
+
+## Etapa 3: grupos, feed, desafios e "começando agora"
+
+- **Grupos** por convite (código ou link `?convite=CÓDIGO`). Maiores de 18 criam; menores só entram por convite, reagem com emojis e não escrevem comentários.
+- **Modos**: sem ranking (só feed), cooperativo (meta coletiva) ou competitivo (placar).
+- **Compartilhar** é sempre escolha da pessoa, tarefa por tarefa: nenhum grupo vem marcado, a foto pode ser escondida e dá para parar de compartilhar depois.
+- **Placar e meta** contam só o que foi compartilhado com aquele grupo, dentro do período do desafio.
+- **Estou começando agora**: mostra nome + título da tarefa aos grupos escolhidos por 45 minutos.
+- **Segurança**: denunciar, silenciar, bloquear; "esconder rankings" no perfil. Denúncias ficam em Supabase > Table Editor > `reports`.

@@ -5,6 +5,7 @@ import type { Progresso } from '../hooks/useProgresso'
 import { CONQUISTAS, emojiDoNivel, infoNivel } from '../lib/progresso'
 import { Logo } from '../components/Logo'
 import { zerarMeusDados } from '../lib/conta'
+import { PrivacidadePerfil } from '../components/grupo/PrivacidadePerfil'
 
 export default function Perfil({ progresso }: { progresso: Progresso }) {
   const { user, profile, sair } = useAuth()
@@ -109,6 +110,8 @@ export default function Perfil({ progresso }: { progresso: Progresso }) {
           </section>
         </>
       )}
+
+      <PrivacidadePerfil />
 
       <section className="flex flex-col gap-3 rounded-3xl border border-line bg-card p-5" aria-label="Dados da conta">
         <h2 className="text-lg font-extrabold">Dados da conta</h2>

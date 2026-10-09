@@ -9,9 +9,10 @@ interface Props {
   onEditar: () => void
   onAmanha: () => void
   onTirar: () => void
+  onComecarAgora?: () => void // só aparece quando a pessoa está em algum grupo
 }
 
-export function TarefaItem({ tarefa: t, onConcluir, onPasso, onEditar, onAmanha, onTirar }: Props) {
+export function TarefaItem({ tarefa: t, onConcluir, onPasso, onEditar, onAmanha, onTirar, onComecarAgora }: Props) {
   const [menu, setMenu] = useState(false)
   const hora = horaCurta(t.scheduled_time)
   const passos = t.task_steps
@@ -66,6 +67,7 @@ export function TarefaItem({ tarefa: t, onConcluir, onPasso, onEditar, onAmanha,
 
       {menu && !t.feita && (
         <div className="mt-3 flex flex-wrap gap-2 animate-fade">
+          {onComecarAgora && <button type="button" className="btn-primary !min-h-[44px] !py-2 text-sm" onClick={() => { setMenu(false); onComecarAgora() }}>🔥 Estou começando agora</button>}
           <button type="button" className="btn-outline !min-h-[44px] !py-2 text-sm" onClick={() => { setMenu(false); onEditar() }}>Editar</button>
           <button type="button" className="btn-outline !min-h-[44px] !py-2 text-sm" onClick={() => { setMenu(false); onAmanha() }}>Deixar para amanhã</button>
           <button type="button" className="btn-ghost !min-h-[44px] !py-2 text-sm" onClick={() => { setMenu(false); onTirar() }}>Tirar da lista</button>

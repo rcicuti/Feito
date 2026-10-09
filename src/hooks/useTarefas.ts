@@ -15,12 +15,15 @@ export interface NovaTarefa {
 export interface ResultadoConclusao {
   pontos: number
   conquistas: string[] // códigos desbloqueados agora
+  compartilhadoEm: number // em quantos grupos foi compartilhada
+  falhouCompartilhar: boolean
 }
 
 export interface DadosConclusao {
   foto: Blob | null
   legenda: string
   visibilidade: Visibilidade
+  compartilhar?: { grupos: string[]; mostrarFoto: boolean } // só quando visibilidade = 'group'
 }
 
 export interface TarefaDoDia extends Tarefa {
@@ -141,16 +144,31 @@ export function useTarefas(userId: string) {
       completed_on: hojeISO(),
       photo_path,
       caption: dados.legenda.trim() || null,
-      visibility: 'private', // nesta etapa só "só eu" funciona
-    }).select('points, created_at').single()
+      visibility: 'private', // ao compartilhar, o banco muda para "group" sozinho
+    }).select('id, points, created_at').single()
     if (error || !nova) {
       if (photo_path) await supabase.storage.from(BUCKET_PROVAS).remove([photo_path])
       return null
     }
+    // compartilha com os grupos escolhidos (o banco passa a marcar a conclusão como "de grupo")
+    let compartilhadoEm = 0
+    let falhouCompartilhar = false
+    if (dados.visibilidade === 'group' && dados.compartilhar && dados.compartilhar.grupos.length > 0) {
+      const { error: eShare } = await supabase.from('completion_shares').insert(
+        dados.compartilhar.grupos.map((g) => ({
+          completion_id: nova.id as string,
+          group_id: g,
+          user_id: userId,
+          share_photo: dados.compartilhar!.mostrarFoto && Boolean(photo_path),
+        })),
+      )
+      if (eShare) falhouCompartilhar = true
+      else compartilhadoEm = dados.compartilhar.grupos.length
+    }
     // conquistas desbloqueadas por esta conclusão (mesma transação = mesmo instante)
     const { data: conq } = await supabase.from('user_achievements').select('code').gte('unlocked_at', nova.created_at)
     await carregar()
-    return { pontos: nova.points as number, conquistas: (conq ?? []).map((c) => c.code as string) }
+    return { pontos: nova.points as number, conquistas: (conq ?? []).map((c) => c.code as string), compartilhadoEm, falhouCompartilhar }
   }
 
   async function alternarPasso(stepId: string) {

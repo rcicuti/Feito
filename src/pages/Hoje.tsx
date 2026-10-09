@@ -14,6 +14,10 @@ import { EditarTarefaSheet } from '../components/EditarTarefaSheet'
 import { Celebracao, type DadosCelebracao } from '../components/Celebracao'
 import { CartaoRetomada } from '../components/CartaoRetomada'
 import { NivelPopup, type DadosNivelPopup } from '../components/NivelPopup'
+import type { Grupo } from '../lib/grupos'
+import type { EstadoAgora } from '../hooks/useComecandoAgora'
+import { ComecarAgoraSheet } from '../components/grupo/ComecarAgoraSheet'
+import { QuemEstaFazendo } from '../components/grupo/QuemEstaFazendo'
 
 function fraseDoAnel(feitas: number, total: number): string {
   if (total === 0) return 'Que tal começar com uma tarefa pequena?'
@@ -24,12 +28,13 @@ function fraseDoAnel(feitas: number, total: number): string {
 
 const chaveDispensa = () => `feito-retomada-${hojeISO()}`
 
-export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; onPerfil: () => void }) {
+export default function Hoje({ progresso, grupos, agora, onPerfil }: { progresso: Progresso; grupos: Grupo[]; agora: EstadoAgora; onPerfil: () => void }) {
   const { user, profile } = useAuth()
   const { tema, alternar } = useTema()
   const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
   const [concluindoId, setConcluindoId] = useState<string | null>(null)
   const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [comecandoId, setComecandoId] = useState<string | null>(null)
   const [celebrando, setCelebrando] = useState<DadosCelebracao | null>(null)
   const [nivelPopup, setNivelPopup] = useState<DadosNivelPopup | null>(null)
   const [dispensado, setDispensado] = useState(() => {
@@ -38,6 +43,7 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
 
   const emConclusao = doDia.find((t) => t.id === concluindoId)
   const emEdicao = doDia.find((t) => t.id === editandoId)
+  const emComeco = doDia.find((t) => t.id === comecandoId)
   const nome = profile?.display_name?.split(' ')[0]
   const resumo = progresso.resumo
   const nivel = resumo ? infoNivel(resumo.total_points) : null
@@ -82,6 +88,8 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
         />
       )}
 
+      <QuemEstaFazendo agora={agora} compacto />
+
       <QuickAdd onCriar={criar} />
 
       {erro && <p role="alert" className="rounded-2xl bg-card p-4 text-soft">{erro}</p>}
@@ -112,6 +120,7 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
                 onEditar={() => setEditandoId(t.id)}
                 onAmanha={() => void remarcarParaAmanha(t.id)}
                 onTirar={() => void tirarDaLista(t.id)}
+                onComecarAgora={grupos.length > 0 ? () => setComecandoId(t.id) : undefined}
               />
             ))}
           </ul>
@@ -133,6 +142,7 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
       {emConclusao && (
         <ConcluirSheet
           titulo={emConclusao.title}
+          grupos={grupos}
           onCancelar={() => setConcluindoId(null)}
           onConfirmar={async (dados) => {
             const nivelAntes = infoNivel(resumo?.total_points ?? 0).nivel
@@ -142,7 +152,8 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
             const novoResumo = await progresso.recarregar()
             const nivelDepois = infoNivel(novoResumo?.total_points ?? (resumo?.total_points ?? 0) + res.pontos)
             setConcluindoId(null)
-            const mensagem = mensagemReforco({
+            void agora.pararSeForEssaTarefa(emConclusao.id)
+            const base = mensagemReforco({
               titulo: emConclusao.title,
               adiada: emConclusao.repeat_type === 'none' && emConclusao.start_date < hojeISO(),
               dificil: emConclusao.is_hard,
@@ -150,6 +161,11 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
               primeiraDoDia: feitas === 0,
               retomada,
             })
+            const mensagem = res.falhouCompartilhar
+              ? `${base} (Não consegui compartilhar com o grupo agora, mas sua tarefa está salva.)`
+              : res.compartilhadoEm > 0
+                ? `${base} Compartilhado com ${res.compartilhadoEm === 1 ? '1 grupo' : `${res.compartilhadoEm} grupos`}.`
+                : base
             const conquistas = res.conquistas.map(conquistaPorCodigo).filter((c): c is Conquista => Boolean(c))
             if (nivelDepois.nivel > nivelAntes) {
               // subiu de nível: um único popup, que só fecha quando a pessoa toca em "Continuar"
@@ -158,6 +174,18 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
               setCelebrando({ mensagem, pontos: res.pontos, conquistas })
             }
             return true
+          }}
+        />
+      )}
+      {emComeco && (
+        <ComecarAgoraSheet
+          titulo={emComeco.title}
+          grupos={grupos}
+          onFechar={() => setComecandoId(null)}
+          onConfirmar={async (ids) => {
+            const e = await agora.comecar(emComeco.id, ids)
+            if (!e) setComecandoId(null)
+            return e
           }}
         />
       )}

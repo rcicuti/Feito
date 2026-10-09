@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const buscarPerfil = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, display_name, birth_date, onboarding_done')
+      .select('id, display_name, birth_date, onboarding_done, hide_rankings')
       .eq('id', userId)
       .maybeSingle()
     // se a busca falhar por um instante, mantém o perfil que já temos (evita a tela piscar)
