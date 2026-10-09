@@ -13,7 +13,7 @@ import { ConcluirSheet } from '../components/ConcluirSheet'
 import { EditarTarefaSheet } from '../components/EditarTarefaSheet'
 import { Celebracao, type DadosCelebracao } from '../components/Celebracao'
 import { CartaoRetomada } from '../components/CartaoRetomada'
-import { NivelPopup, type DadosNivel } from '../components/NivelPopup'
+import { NivelPopup, type DadosNivelPopup } from '../components/NivelPopup'
 
 function fraseDoAnel(feitas: number, total: number): string {
   if (total === 0) return 'Que tal começar com uma tarefa pequena?'
@@ -31,8 +31,7 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
   const [concluindoId, setConcluindoId] = useState<string | null>(null)
   const [editandoId, setEditandoId] = useState<string | null>(null)
   const [celebrando, setCelebrando] = useState<DadosCelebracao | null>(null)
-  const [nivelPendente, setNivelPendente] = useState<DadosNivel | null>(null)
-  const [nivelPopup, setNivelPopup] = useState<DadosNivel | null>(null)
+  const [nivelPopup, setNivelPopup] = useState<DadosNivelPopup | null>(null)
   const [dispensado, setDispensado] = useState(() => {
     try { return localStorage.getItem(chaveDispensa()) === '1' } catch { return false }
   })
@@ -143,36 +142,26 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
             const novoResumo = await progresso.recarregar()
             const nivelDepois = infoNivel(novoResumo?.total_points ?? (resumo?.total_points ?? 0) + res.pontos)
             setConcluindoId(null)
-            setCelebrando({
-              mensagem: mensagemReforco({
-                titulo: emConclusao.title,
-                adiada: emConclusao.repeat_type === 'none' && emConclusao.start_date < hojeISO(),
-                dificil: emConclusao.is_hard,
-                totalPassos: emConclusao.task_steps.length,
-                primeiraDoDia: feitas === 0,
-                retomada,
-              }),
-              pontos: res.pontos,
-              conquistas: res.conquistas.map(conquistaPorCodigo).filter((c): c is Conquista => Boolean(c)),
+            const mensagem = mensagemReforco({
+              titulo: emConclusao.title,
+              adiada: emConclusao.repeat_type === 'none' && emConclusao.start_date < hojeISO(),
+              dificil: emConclusao.is_hard,
+              totalPassos: emConclusao.task_steps.length,
+              primeiraDoDia: feitas === 0,
+              retomada,
             })
-            // subiu de nível: o popup aparece depois da celebração
-            setNivelPendente(nivelDepois.nivel > nivelAntes ? { nivel: nivelDepois.nivel, nome: nivelDepois.nome, faltam: nivelDepois.faltam } : null)
+            const conquistas = res.conquistas.map(conquistaPorCodigo).filter((c): c is Conquista => Boolean(c))
+            if (nivelDepois.nivel > nivelAntes) {
+              // subiu de nível: um único popup, que só fecha quando a pessoa toca em "Continuar"
+              setNivelPopup({ nivel: nivelDepois.nivel, nome: nivelDepois.nome, faltam: nivelDepois.faltam, mensagem, pontos: res.pontos, conquistas })
+            } else {
+              setCelebrando({ mensagem, pontos: res.pontos, conquistas })
+            }
             return true
           }}
         />
       )}
-      {celebrando && (
-        <Celebracao
-          dados={celebrando}
-          onFim={() => {
-            setCelebrando(null)
-            if (nivelPendente) {
-              setNivelPopup(nivelPendente)
-              setNivelPendente(null)
-            }
-          }}
-        />
-      )}
+      {celebrando && <Celebracao dados={celebrando} onFim={() => setCelebrando(null)} />}
       {nivelPopup && <NivelPopup dados={nivelPopup} onFechar={() => setNivelPopup(null)} />}
     </div>
   )
