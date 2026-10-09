@@ -12,6 +12,7 @@ import { TarefaItem } from '../components/TarefaItem'
 import { ConcluirSheet } from '../components/ConcluirSheet'
 import { Celebracao, type DadosCelebracao } from '../components/Celebracao'
 import { CartaoRetomada } from '../components/CartaoRetomada'
+import { NivelPopup, type DadosNivel } from '../components/NivelPopup'
 
 function fraseDoAnel(feitas: number, total: number): string {
   if (total === 0) return 'Que tal começar com uma tarefa pequena?'
@@ -28,6 +29,8 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
   const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
   const [concluindoId, setConcluindoId] = useState<string | null>(null)
   const [celebrando, setCelebrando] = useState<DadosCelebracao | null>(null)
+  const [nivelPendente, setNivelPendente] = useState<DadosNivel | null>(null)
+  const [nivelPopup, setNivelPopup] = useState<DadosNivel | null>(null)
   const [dispensado, setDispensado] = useState(() => {
     try { return localStorage.getItem(chaveDispensa()) === '1' } catch { return false }
   })
@@ -134,14 +137,27 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
                 retomada,
               }),
               pontos: res.pontos,
-              nivelNovo: nivelDepois.nivel > nivelAntes ? { nivel: nivelDepois.nivel, nome: nivelDepois.nome } : null,
               conquistas: res.conquistas.map(conquistaPorCodigo).filter((c): c is Conquista => Boolean(c)),
             })
+            // subiu de nível: o popup aparece depois da celebração
+            setNivelPendente(nivelDepois.nivel > nivelAntes ? { nivel: nivelDepois.nivel, nome: nivelDepois.nome, faltam: nivelDepois.faltam } : null)
             return true
           }}
         />
       )}
-      {celebrando && <Celebracao dados={celebrando} onFim={() => setCelebrando(null)} />}
+      {celebrando && (
+        <Celebracao
+          dados={celebrando}
+          onFim={() => {
+            setCelebrando(null)
+            if (nivelPendente) {
+              setNivelPopup(nivelPendente)
+              setNivelPendente(null)
+            }
+          }}
+        />
+      )}
+      {nivelPopup && <NivelPopup dados={nivelPopup} onFechar={() => setNivelPopup(null)} />}
     </div>
   )
 }

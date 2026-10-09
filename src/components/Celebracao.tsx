@@ -6,12 +6,11 @@ const CORES = ['#2f9e7a', '#f4b740', '#e07a5f', '#6c8ebf', '#b07cc6']
 export interface DadosCelebracao {
   mensagem: string
   pontos: number
-  nivelNovo: { nivel: number; nome: string } | null
   conquistas: Conquista[]
 }
 
 export function Celebracao({ dados, onFim }: { dados: DadosCelebracao; onFim: () => void }) {
-  const extras = dados.conquistas.length > 0 || dados.nivelNovo !== null
+  const extras = dados.conquistas.length > 0
   useEffect(() => {
     const t = setTimeout(onFim, extras ? 5000 : 3000)
     return () => clearTimeout(t)
@@ -33,9 +32,6 @@ export function Celebracao({ dados, onFim }: { dados: DadosCelebracao; onFim: ()
         <p className="text-xl font-extrabold leading-snug">{dados.mensagem}</p>
         <p className="rounded-full bg-brand/15 px-4 py-1.5 text-lg font-extrabold text-brand">+{dados.pontos} pontos</p>
 
-        {dados.nivelNovo && (
-          <p className="font-bold">🎉 Você chegou ao nível {dados.nivelNovo.nivel}: {dados.nivelNovo.nome}</p>
-        )}
         {dados.conquistas.map((c) => (
           <p key={c.codigo} className="flex items-center gap-2 rounded-2xl bg-bg px-4 py-2 text-left">
             <span className="text-2xl" aria-hidden>{c.emoji}</span>

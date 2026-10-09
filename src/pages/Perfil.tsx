@@ -1,10 +1,8 @@
 import { useAuth } from '../context/AuthContext'
 import { useTema } from '../context/ThemeContext'
 import type { Progresso } from '../hooks/useProgresso'
-import { CONQUISTAS, infoNivel } from '../lib/progresso'
+import { CONQUISTAS, emojiDoNivel, infoNivel } from '../lib/progresso'
 import { Logo } from '../components/Logo'
-
-const EMOJI_NIVEL = ['🌱', '🌿', '🪴', '🍃', '🌷', '🌸', '🌳', '🌲']
 
 export default function Perfil({ progresso }: { progresso: Progresso }) {
   const { profile, sair } = useAuth()
@@ -35,7 +33,7 @@ export default function Perfil({ progresso }: { progresso: Progresso }) {
           <section className="flex flex-col gap-3 rounded-3xl border border-line bg-card p-5" aria-label="Nível e pontos">
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand/15 text-4xl" aria-hidden>
-                {EMOJI_NIVEL[Math.min(nivel.nivel - 1, EMOJI_NIVEL.length - 1)]}
+                {emojiDoNivel(nivel.nivel)}
               </div>
               <div>
                 <p className="text-sm font-semibold text-soft">Nível {nivel.nivel}</p>

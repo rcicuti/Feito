@@ -104,3 +104,21 @@ export function mensagemReforco(c: ContextoReforco): string {
   if (c.primeiraDoDia) return `Primeira do dia: ${sujeito.toLowerCase()}${feito}. Começar é a parte mais difícil.`
   return `${sujeito}${feito}. Um passo real, e foi seu.`
 }
+
+// ---------- Subida de nível ----------
+export const EMOJI_NIVEL = ['🌱', '🌿', '🪴', '🍃', '🌷', '🌸', '🌳', '🌲']
+export const emojiDoNivel = (nivel: number) => EMOJI_NIVEL[Math.min(nivel - 1, EMOJI_NIVEL.length - 1)]
+
+const MENSAGENS_NIVEL: Record<number, string> = {
+  2: 'Seu primeiro broto apareceu! Começar era a parte mais difícil, e você começou.',
+  3: 'Você está criando raízes. A constância é feita desses passos pequenos.',
+  4: 'Olha como você está crescendo! Cada tarefa feita alimenta esse caminho.',
+  5: 'Algo bonito está se formando. Siga no seu ritmo, sem pressa.',
+  6: 'Você floresceu! Tudo o que fez até aqui teve valor.',
+  7: 'Raízes fortes, galhos firmes. Você construiu isso passo a passo.',
+  8: 'Você já é uma floresta inteira. Orgulhe-se de cada passo da jornada.',
+}
+
+export function mensagemNivel(nivel: number): string {
+  return MENSAGENS_NIVEL[nivel] ?? 'Mais um nível! Sua constância é admirável e vale a pena comemorar.'
+}
