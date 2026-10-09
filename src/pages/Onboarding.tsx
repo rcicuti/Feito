@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { Logo } from '../components/Logo'
+import { idadeEmAnos } from '../lib/dates'
 
 const SLIDES = [
   { emoji: '🌱', titulo: 'Pequenos passos contam', texto: 'Aqui você quebra o dia em tarefas pequenas e reconhece cada uma que fizer. Sem cobrança.' },
@@ -14,6 +15,8 @@ export default function Onboarding() {
   const [etapa, setEtapa] = useState(0) // 0 = dados básicos; 1..3 = slides
   const [nome, setNome] = useState('')
   const [nascimento, setNascimento] = useState('')
+  const [terapeuta, setTerapeuta] = useState(false)
+  const [crp, setCrp] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -28,6 +31,10 @@ export default function Onboarding() {
       .from('profiles')
       .update({ display_name: nome.trim() || null, birth_date: nascimento })
       .eq('id', user!.id)
+    if (!error && terapeuta && idadeEmAnos(nascimento) >= 18) {
+      // se o SQL 0005 ainda não foi rodado, isso falha em silêncio e dá para ativar depois, no perfil
+      await supabase.rpc('definir_papel_terapeuta', { p_ativo: true, p_crp: crp })
+    }
     setSalvando(false)
     if (error) setErro('Não consegui salvar agora. Tente de novo.')
     else setEtapa(1)
@@ -53,6 +60,18 @@ export default function Onboarding() {
           <input type="date" className="field" value={nascimento} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setNascimento(e.target.value)} />
           <span className="text-sm text-soft">Usamos só para proteger menores de idade. Não aparece para ninguém.</span>
         </label>
+        {nascimento && idadeEmAnos(nascimento) >= 18 && (
+          <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-4">
+            <label className="flex min-h-[44px] items-start gap-3">
+              <input type="checkbox" className="mt-1 h-5 w-5 accent-[rgb(var(--brand))]" checked={terapeuta} onChange={(e) => setTerapeuta(e.target.checked)} />
+              <span>
+                <span className="block font-semibold">Sou terapeuta / profissional <span className="font-normal text-soft">(opcional)</span></span>
+                <span className="block text-sm text-soft">Para acompanhar pacientes que escolherem compartilhar algo com você. Dá para mudar depois no perfil.</span>
+              </span>
+            </label>
+            {terapeuta && <input className="field" maxLength={30} placeholder="CRP (opcional)" value={crp} onChange={(e) => setCrp(e.target.value)} />}
+          </div>
+        )}
         {erro && <p role="alert" className="text-sm text-soft">{erro}</p>}
         <button className="btn-primary" disabled={salvando} onClick={salvarBasico}>Continuar</button>
       </main>

@@ -15,6 +15,7 @@ import { Celebracao, type DadosCelebracao } from '../components/Celebracao'
 import { CartaoRetomada } from '../components/CartaoRetomada'
 import { NivelPopup, type DadosNivelPopup } from '../components/NivelPopup'
 import type { Grupo } from '../lib/grupos'
+import type { VinculoTerapeuta } from '../lib/terapia'
 import type { EstadoAgora } from '../hooks/useComecandoAgora'
 import { ComecarAgoraSheet } from '../components/grupo/ComecarAgoraSheet'
 import { QuemEstaFazendo } from '../components/grupo/QuemEstaFazendo'
@@ -28,7 +29,7 @@ function fraseDoAnel(feitas: number, total: number): string {
 
 const chaveDispensa = () => `feito-retomada-${hojeISO()}`
 
-export default function Hoje({ progresso, grupos, agora, onPerfil }: { progresso: Progresso; grupos: Grupo[]; agora: EstadoAgora; onPerfil: () => void }) {
+export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil }: { progresso: Progresso; grupos: Grupo[]; terapeutas: VinculoTerapeuta[]; agora: EstadoAgora; onPerfil: () => void }) {
   const { user, profile } = useAuth()
   const { tema, alternar } = useTema()
   const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
@@ -143,6 +144,7 @@ export default function Hoje({ progresso, grupos, agora, onPerfil }: { progresso
         <ConcluirSheet
           titulo={emConclusao.title}
           grupos={grupos}
+          terapeutas={terapeutas}
           onCancelar={() => setConcluindoId(null)}
           onConfirmar={async (dados) => {
             const nivelAntes = infoNivel(resumo?.total_points ?? 0).nivel
@@ -165,7 +167,9 @@ export default function Hoje({ progresso, grupos, agora, onPerfil }: { progresso
               ? `${base} (Não consegui compartilhar com o grupo agora, mas sua tarefa está salva.)`
               : res.compartilhadoEm > 0
                 ? `${base} Compartilhado com ${res.compartilhadoEm === 1 ? '1 grupo' : `${res.compartilhadoEm} grupos`}.`
-                : base
+                : res.terapeutasEm > 0
+                  ? `${base} Compartilhado com ${res.terapeutasEm === 1 ? 'seu(sua) terapeuta' : 'seus terapeutas'}.`
+                  : base
             const conquistas = res.conquistas.map(conquistaPorCodigo).filter((c): c is Conquista => Boolean(c))
             if (nivelDepois.nivel > nivelAntes) {
               // subiu de nível: um único popup, que só fecha quando a pessoa toca em "Continuar"

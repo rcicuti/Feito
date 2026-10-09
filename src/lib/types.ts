@@ -7,6 +7,8 @@ export interface Profile {
   birth_date: string | null
   onboarding_done: boolean
   hide_rankings: boolean
+  is_therapist: boolean
+  crp: string | null
 }
 
 export interface Passo {

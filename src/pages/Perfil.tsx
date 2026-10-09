@@ -6,8 +6,9 @@ import { CONQUISTAS, emojiDoNivel, infoNivel } from '../lib/progresso'
 import { Logo } from '../components/Logo'
 import { zerarMeusDados } from '../lib/conta'
 import { PrivacidadePerfil } from '../components/grupo/PrivacidadePerfil'
+import { PapelTerapeuta } from '../components/terapia/PapelTerapeuta'
 
-export default function Perfil({ progresso }: { progresso: Progresso }) {
+export default function Perfil({ progresso, onTerapia }: { progresso: Progresso; onTerapia: () => void }) {
   const { user, profile, sair } = useAuth()
   const { tema, alternar } = useTema()
   const { resumo, desbloqueadas, carregando } = progresso
@@ -112,6 +113,8 @@ export default function Perfil({ progresso }: { progresso: Progresso }) {
       )}
 
       <PrivacidadePerfil />
+
+      <PapelTerapeuta onAbrirTerapia={onTerapia} />
 
       <section className="flex flex-col gap-3 rounded-3xl border border-line bg-card p-5" aria-label="Dados da conta">
         <h2 className="text-lg font-extrabold">Dados da conta</h2>

@@ -1,9 +1,10 @@
-export type Aba = 'hoje' | 'grupos' | 'perfil'
+export type Aba = 'hoje' | 'grupos' | 'terapia' | 'perfil'
 
-export function NavInferior({ aba, onMudar }: { aba: Aba; onMudar: (a: Aba) => void }) {
+export function NavInferior({ aba, onMudar, mostrarTerapia = false }: { aba: Aba; onMudar: (a: Aba) => void; mostrarTerapia?: boolean }) {
   const itens: { id: Aba; emoji: string; rotulo: string }[] = [
     { id: 'hoje', emoji: '✅', rotulo: 'Hoje' },
     { id: 'grupos', emoji: '👥', rotulo: 'Grupos' },
+    ...(mostrarTerapia ? [{ id: 'terapia' as Aba, emoji: '🤝', rotulo: 'Terapia' }] : []),
     { id: 'perfil', emoji: '🌱', rotulo: 'Perfil' },
   ]
   return (

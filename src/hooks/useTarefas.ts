@@ -16,6 +16,7 @@ export interface ResultadoConclusao {
   pontos: number
   conquistas: string[] // códigos desbloqueados agora
   compartilhadoEm: number // em quantos grupos foi compartilhada
+  terapeutasEm: number // com quantos terapeutas
   falhouCompartilhar: boolean
 }
 
@@ -24,6 +25,7 @@ export interface DadosConclusao {
   legenda: string
   visibilidade: Visibilidade
   compartilhar?: { grupos: string[]; mostrarFoto: boolean } // só quando visibilidade = 'group'
+  compartilharTerapeuta?: { vinculos: string[]; mostrarFoto: boolean } // só quando visibilidade = 'therapist'
 }
 
 export interface TarefaDoDia extends Tarefa {
@@ -165,10 +167,24 @@ export function useTarefas(userId: string) {
       if (eShare) falhouCompartilhar = true
       else compartilhadoEm = dados.compartilhar.grupos.length
     }
+    // compartilha com os terapeutas escolhidos (só funciona se a chave "tarefas" do vínculo estiver ligada)
+    let terapeutasEm = 0
+    if (dados.visibilidade === 'therapist' && dados.compartilharTerapeuta && dados.compartilharTerapeuta.vinculos.length > 0) {
+      const { error: eT } = await supabase.from('therapist_shares').insert(
+        dados.compartilharTerapeuta.vinculos.map((l) => ({
+          completion_id: nova.id as string,
+          link_id: l,
+          user_id: userId,
+          share_photo: dados.compartilharTerapeuta!.mostrarFoto && Boolean(photo_path),
+        })),
+      )
+      if (eT) falhouCompartilhar = true
+      else terapeutasEm = dados.compartilharTerapeuta.vinculos.length
+    }
     // conquistas desbloqueadas por esta conclusão (mesma transação = mesmo instante)
     const { data: conq } = await supabase.from('user_achievements').select('code').gte('unlocked_at', nova.created_at)
     await carregar()
-    return { pontos: nova.points as number, conquistas: (conq ?? []).map((c) => c.code as string), compartilhadoEm, falhouCompartilhar }
+    return { pontos: nova.points as number, conquistas: (conq ?? []).map((c) => c.code as string), compartilhadoEm, terapeutasEm, falhouCompartilhar }
   }
 
   async function alternarPasso(stepId: string) {

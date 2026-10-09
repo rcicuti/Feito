@@ -1,4 +1,4 @@
-# Feito! — Etapas 1 a 3 (base, pontos, grupos)
+# Feito! — Etapas 1 a 4 (base, pontos, grupos, terapeuta)
 
 Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 
@@ -14,7 +14,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 ## Como configurar
 
 1. **Supabase**: crie um projeto em supabase.com.
-2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` (cada uma uma vez só).
+2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` e `0005_etapa4_terapeuta.sql` (cada uma uma vez só).
 3. Em **Project Settings → API**, copie a *Project URL* e a chave *anon public*.
 4. Copie `.env.example` para `.env` e preencha as duas variáveis.
 5. **Login com e-mail**: em *Authentication → URL Configuration*, ponha a URL do app em *Site URL* e em *Redirect URLs* (ex.: `http://localhost:5173` e a URL publicada).
@@ -44,7 +44,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 - Fotos ficam no bucket privado `provas`, em pasta `<id-da-pessoa>/...`, com política por pasta. Para exibir foto no futuro, use URL assinada (`createSignedUrl`).
 
 ## Ainda não está nesta etapa (de propósito)
-Terapeuta (4); notificações, configurações e excluir conta (5).
+Notificações, configurações e excluir conta (5).
 
 ## Etapa 3: grupos, feed, desafios e "começando agora"
 
@@ -54,3 +54,11 @@ Terapeuta (4); notificações, configurações e excluir conta (5).
 - **Placar e meta** contam só o que foi compartilhado com aquele grupo, dentro do período do desafio.
 - **Estou começando agora**: mostra nome + título da tarefa aos grupos escolhidos por 45 minutos.
 - **Segurança**: denunciar, silenciar, bloquear; "esconder rankings" no perfil. Denúncias ficam em Supabase > Table Editor > `reports`.
+
+## Etapa 4: terapeuta
+
+- **Quem é terapeuta**: a pessoa (maior de 18) marca "Sou terapeuta" no cadastro ou no Perfil. O CRP é opcional e **não é verificado**.
+- **Vínculo** por código: o(a) terapeuta tem um código fixo (o paciente digita) ou o paciente gera um código de 48 h (o terapeuta digita). Em qualquer caminho, **só vale depois que o paciente aceita**.
+- **Duas chaves** por vínculo, que o paciente liga/desliga quando quiser: *tarefas* (só as conclusões marcadas "Meu(minha) terapeuta") e *resumo semanal* (só números). Desligar *tarefas* apaga o que já foi compartilhado.
+- Terapeuta **comenta** nas conclusões compartilhadas e **sugere tarefas**; sugestão só entra na lista se o paciente aceitar. Sem chat.
+- Menores de 18 não se vinculam nem viram terapeutas (fluxo de responsável é futuro).

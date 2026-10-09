@@ -3,6 +3,7 @@ import { comprimirImagem } from '../lib/image'
 import type { Visibilidade } from '../lib/types'
 import type { DadosConclusao } from '../hooks/useTarefas'
 import type { Grupo } from '../lib/grupos'
+import type { VinculoTerapeuta } from '../lib/terapia'
 
 const OPCOES: { valor: Visibilidade; rotulo: string }[] = [
   { valor: 'private', rotulo: 'Só eu' },
@@ -13,17 +14,19 @@ const OPCOES: { valor: Visibilidade; rotulo: string }[] = [
 interface Props {
   titulo: string
   grupos: Grupo[]
+  terapeutas: VinculoTerapeuta[] // vínculos ativos com a chave "tarefas" ligada
   onCancelar: () => void
   onConfirmar: (d: DadosConclusao) => Promise<boolean>
 }
 
-export function ConcluirSheet({ titulo, grupos, onCancelar, onConfirmar }: Props) {
+export function ConcluirSheet({ titulo, grupos, terapeutas, onCancelar, onConfirmar }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [foto, setFoto] = useState<Blob | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [legenda, setLegenda] = useState('')
   const [visibilidade, setVisibilidade] = useState<Visibilidade>('private')
   const [escolhidos, setEscolhidos] = useState<string[]>([]) // nenhum grupo vem marcado
+  const [escolhidosT, setEscolhidosT] = useState<string[]>([])
   const [mostrarFoto, setMostrarFoto] = useState(true)
   const [processando, setProcessando] = useState(false)
   const [enviando, setEnviando] = useState(false)
@@ -46,13 +49,14 @@ export function ConcluirSheet({ titulo, grupos, onCancelar, onConfirmar }: Props
     setProcessando(false)
   }
 
-  const semGrupo = visibilidade === 'group' && escolhidos.length === 0
+  const semGrupo = (visibilidade === 'group' && escolhidos.length === 0) || (visibilidade === 'therapist' && escolhidosT.length === 0)
+  const alternarT = (id: string) => setEscolhidosT((e) => (e.includes(id) ? e.filter((x) => x !== id) : [...e, id]))
   const alternarGrupo = (id: string) => setEscolhidos((e) => (e.includes(id) ? e.filter((x) => x !== id) : [...e, id]))
 
   async function concluir(comFoto: boolean) {
     setEnviando(true)
     setErro(null)
-    const ok = await onConfirmar({ foto: comFoto ? foto : null, legenda, visibilidade, compartilhar: visibilidade === 'group' ? { grupos: escolhidos, mostrarFoto } : undefined })
+    const ok = await onConfirmar({ foto: comFoto ? foto : null, legenda, visibilidade, compartilhar: visibilidade === 'group' ? { grupos: escolhidos, mostrarFoto } : undefined, compartilharTerapeuta: visibilidade === 'therapist' ? { vinculos: escolhidosT, mostrarFoto } : undefined })
     if (!ok) {
       setEnviando(false)
       setErro('Não consegui salvar agora. Sua tarefa continua aqui, tente de novo.')
@@ -95,12 +99,12 @@ export function ConcluirSheet({ titulo, grupos, onCancelar, onConfirmar }: Props
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 text-sm font-semibold">Quem pode ver?</legend>
           {OPCOES.map((o) => {
-            const ativo = o.valor === 'private' || (o.valor === 'group' && grupos.length > 0)
+            const ativo = o.valor === 'private' || (o.valor === 'group' && grupos.length > 0) || (o.valor === 'therapist' && terapeutas.length > 0)
             return (
               <label key={o.valor} className={`flex min-h-[48px] items-center gap-3 rounded-2xl border px-4 ${visibilidade === o.valor ? 'border-brand bg-brand/10' : 'border-line bg-card'} ${ativo ? '' : 'opacity-50'}`}>
                 <input type="radio" name="visibilidade" className="accent-[rgb(var(--brand))]" disabled={!ativo} checked={visibilidade === o.valor} onChange={() => setVisibilidade(o.valor)} />
                 <span className="flex-1 font-semibold">{o.rotulo}</span>
-                {!ativo && <span className="text-xs text-soft">{o.valor === 'group' ? 'entre em um grupo' : 'em breve'}</span>}
+                {!ativo && <span className="text-xs text-soft">{o.valor === 'group' ? 'entre em um grupo' : 'vincule em Terapia'}</span>}
               </label>
             )
           })}
@@ -123,6 +127,26 @@ export function ConcluirSheet({ titulo, grupos, onCancelar, onConfirmar }: Props
               </label>
             )}
             {semGrupo && <p className="text-sm text-soft">Escolha pelo menos um grupo, ou volte para “Só eu”.</p>}
+          </fieldset>
+        )}
+
+        {visibilidade === 'therapist' && (
+          <fieldset className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-4">
+            <legend className="px-1 text-sm font-semibold">Quem pode ver?</legend>
+            {terapeutas.map((t) => (
+              <label key={t.link_id} className="flex min-h-[44px] items-center gap-3">
+                <input type="checkbox" className="h-5 w-5 accent-[rgb(var(--brand))]" checked={escolhidosT.includes(t.link_id)} onChange={() => alternarT(t.link_id)} />
+                <span className="font-semibold">{t.nome}</span>
+              </label>
+            ))}
+            <p className="text-xs text-soft">Essa pessoa vai ver o título, a legenda e (se você deixar) a foto desta tarefa, e poderá comentar. Você pode parar de compartilhar depois.</p>
+            {foto && (
+              <label className="flex min-h-[44px] items-center gap-3 border-t border-line pt-2">
+                <input type="checkbox" className="h-5 w-5 accent-[rgb(var(--brand))]" checked={mostrarFoto} onChange={(e) => setMostrarFoto(e.target.checked)} />
+                <span className="font-semibold">Mostrar a foto</span>
+              </label>
+            )}
+            {semGrupo && <p className="text-sm text-soft">Escolha pelo menos uma pessoa, ou volte para “Só eu”.</p>}
           </fieldset>
         )}
 
