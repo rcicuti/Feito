@@ -6,11 +6,12 @@ interface Props {
   tarefa: TarefaDoDia
   onConcluir: () => void
   onPasso: (stepId: string) => void
+  onEditar: () => void
   onAmanha: () => void
   onTirar: () => void
 }
 
-export function TarefaItem({ tarefa: t, onConcluir, onPasso, onAmanha, onTirar }: Props) {
+export function TarefaItem({ tarefa: t, onConcluir, onPasso, onEditar, onAmanha, onTirar }: Props) {
   const [menu, setMenu] = useState(false)
   const hora = horaCurta(t.scheduled_time)
   const passos = t.task_steps
@@ -65,6 +66,7 @@ export function TarefaItem({ tarefa: t, onConcluir, onPasso, onAmanha, onTirar }
 
       {menu && !t.feita && (
         <div className="mt-3 flex flex-wrap gap-2 animate-fade">
+          <button type="button" className="btn-outline !min-h-[44px] !py-2 text-sm" onClick={() => { setMenu(false); onEditar() }}>Editar</button>
           <button type="button" className="btn-outline !min-h-[44px] !py-2 text-sm" onClick={() => { setMenu(false); onAmanha() }}>Deixar para amanhã</button>
           <button type="button" className="btn-ghost !min-h-[44px] !py-2 text-sm" onClick={() => { setMenu(false); onTirar() }}>Tirar da lista</button>
         </div>

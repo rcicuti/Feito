@@ -164,6 +164,13 @@ export function useTarefas(userId: string) {
     }
   }
 
+  async function editar(tarefaId: string, dados: { title: string; scheduled_time: string | null; is_hard: boolean }): Promise<boolean> {
+    const { error } = await supabase.from('tasks').update(dados).eq('id', tarefaId)
+    if (error) return false
+    await carregar()
+    return true
+  }
+
   async function remarcarParaAmanha(tarefaId: string) {
     await supabase.from('tasks').update({ start_date: amanhaISO() }).eq('id', tarefaId)
     await carregar()
@@ -174,5 +181,5 @@ export function useTarefas(userId: string) {
     await carregar()
   }
 
-  return { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, remarcarParaAmanha, tirarDaLista }
+  return { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, tirarDaLista }
 }

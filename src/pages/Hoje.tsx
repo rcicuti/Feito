@@ -10,6 +10,7 @@ import { ProgressRing } from '../components/ProgressRing'
 import { QuickAdd } from '../components/QuickAdd'
 import { TarefaItem } from '../components/TarefaItem'
 import { ConcluirSheet } from '../components/ConcluirSheet'
+import { EditarTarefaSheet } from '../components/EditarTarefaSheet'
 import { Celebracao, type DadosCelebracao } from '../components/Celebracao'
 import { CartaoRetomada } from '../components/CartaoRetomada'
 import { NivelPopup, type DadosNivel } from '../components/NivelPopup'
@@ -26,8 +27,9 @@ const chaveDispensa = () => `feito-retomada-${hojeISO()}`
 export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; onPerfil: () => void }) {
   const { user, profile } = useAuth()
   const { tema, alternar } = useTema()
-  const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
+  const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
   const [concluindoId, setConcluindoId] = useState<string | null>(null)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
   const [celebrando, setCelebrando] = useState<DadosCelebracao | null>(null)
   const [nivelPendente, setNivelPendente] = useState<DadosNivel | null>(null)
   const [nivelPopup, setNivelPopup] = useState<DadosNivel | null>(null)
@@ -36,6 +38,7 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
   })
 
   const emConclusao = doDia.find((t) => t.id === concluindoId)
+  const emEdicao = doDia.find((t) => t.id === editandoId)
   const nome = profile?.display_name?.split(' ')[0]
   const resumo = progresso.resumo
   const nivel = resumo ? infoNivel(resumo.total_points) : null
@@ -107,6 +110,7 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
                   const estavaFeito = t.passosFeitos.has(id)
                   if (!estavaFeito && faltam === 0 && t.task_steps.length > 0) setConcluindoId(t.id)
                 }}
+                onEditar={() => setEditandoId(t.id)}
                 onAmanha={() => void remarcarParaAmanha(t.id)}
                 onTirar={() => void tirarDaLista(t.id)}
               />
@@ -114,6 +118,18 @@ export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; on
           </ul>
         )}
       </main>
+
+      {emEdicao && (
+        <EditarTarefaSheet
+          tarefa={emEdicao}
+          onCancelar={() => setEditandoId(null)}
+          onSalvar={async (dados) => {
+            const ok = await editar(emEdicao.id, dados)
+            if (ok) setEditandoId(null)
+            return ok
+          }}
+        />
+      )}
 
       {emConclusao && (
         <ConcluirSheet
