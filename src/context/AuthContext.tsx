@@ -24,11 +24,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const usuarioAtual = useRef<string | null>(null)
 
   const buscarPerfil = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    let { data, error } = await supabase
       .from('profiles')
       .select('id, display_name, birth_date, onboarding_done, hide_rankings')
       .eq('id', userId)
       .maybeSingle()
+    if (error) {
+      // o SQL 0004 ainda não foi rodado (coluna hide_rankings não existe): abre o app mesmo assim
+      const r = await supabase.from('profiles').select('id, display_name, birth_date, onboarding_done').eq('id', userId).maybeSingle()
+      data = r.data ? { ...r.data, hide_rankings: false } : null
+    }
     // se a busca falhar por um instante, mantém o perfil que já temos (evita a tela piscar)
     if (data) setProfile(data as Profile)
   }, [])
