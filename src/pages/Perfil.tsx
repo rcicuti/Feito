@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTema } from '../context/ThemeContext'
 import type { Progresso } from '../hooks/useProgresso'
 import { CONQUISTAS, emojiDoNivel, infoNivel } from '../lib/progresso'
 import { Logo } from '../components/Logo'
+import { zerarMeusDados } from '../lib/conta'
 
 export default function Perfil({ progresso }: { progresso: Progresso }) {
-  const { profile, sair } = useAuth()
+  const { user, profile, sair } = useAuth()
   const { tema, alternar } = useTema()
   const { resumo, desbloqueadas, carregando } = progresso
 
@@ -14,6 +16,22 @@ export default function Perfil({ progresso }: { progresso: Progresso }) {
   const total = CONQUISTAS.length
   const qtd = CONQUISTAS.filter((c) => desbloqueadas[c.codigo]).length
   const atual = resumo?.sequencia_atual ?? 0
+  const [confirmando, setConfirmando] = useState(false)
+  const [zerando, setZerando] = useState(false)
+  const [aviso, setAviso] = useState<string | null>(null)
+
+  async function zerar() {
+    setZerando(true)
+    const ok = await zerarMeusDados(user!.id)
+    setZerando(false)
+    setConfirmando(false)
+    if (ok) {
+      await progresso.recarregar()
+      setAviso('Pronto! Sua conta está zerada. Você começa do início, com o mesmo login.')
+    } else {
+      setAviso('Não consegui zerar agora. Confira se rodou o SQL 0003 no Supabase e tente de novo.')
+    }
+  }
 
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col gap-5 px-4 pb-28 pt-5">
@@ -92,8 +110,28 @@ export default function Perfil({ progresso }: { progresso: Progresso }) {
         </>
       )}
 
+      <section className="flex flex-col gap-3 rounded-3xl border border-line bg-card p-5" aria-label="Dados da conta">
+        <h2 className="text-lg font-extrabold">Dados da conta</h2>
+        <p className="text-sm text-soft">Quer recomeçar do zero? Isso apaga suas tarefas, fotos, pontos e conquistas. Seu login continua o mesmo.</p>
+        {aviso && <p role="status" className="rounded-2xl bg-brand/10 p-3 text-sm">{aviso}</p>}
+        <button className="btn-outline" onClick={() => { setAviso(null); setConfirmando(true) }}>Zerar meus dados</button>
+      </section>
+
       <button className="btn-outline mt-2" onClick={sair}>Sair</button>
       <p className="text-center text-xs text-soft">O Feito! não substitui acompanhamento profissional e não faz diagnóstico.</p>
+
+      {confirmando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6 animate-fade" onClick={() => !zerando && setConfirmando(false)}>
+          <div role="alertdialog" aria-modal="true" aria-labelledby="zerar-titulo" aria-describedby="zerar-texto" className="flex w-full max-w-sm flex-col gap-3 rounded-3xl border border-line bg-card p-6 animate-pop" onClick={(e) => e.stopPropagation()}>
+            <h2 id="zerar-titulo" className="text-xl font-extrabold">Zerar todos os seus dados?</h2>
+            <p id="zerar-texto" className="text-soft">
+              Vamos apagar todas as suas tarefas, fotos, pontos, níveis, conquistas e dias de descanso. Isso não tem volta. Seu login e seu nome continuam.
+            </p>
+            <button className="btn-primary" disabled={zerando} onClick={zerar}>{zerando ? 'Apagando…' : 'Sim, zerar tudo'}</button>
+            <button className="btn-ghost" disabled={zerando} onClick={() => setConfirmando(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
