@@ -8,6 +8,8 @@ interface AuthState {
   session: Session | null
   user: User | null
   profile: Profile | null
+  recuperandoSenha: boolean
+  finalizarRecuperacao: () => void
   recarregarPerfil: () => Promise<void>
   sair: () => Promise<void>
 }
@@ -18,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [carregando, setCarregando] = useState(true)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [recuperandoSenha, setRecuperandoSenha] = useState(false)
 
   const buscarPerfil = useCallback(async (userId: string) => {
     const { data } = await supabase
@@ -38,7 +41,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.session) await buscarPerfil(data.session.user.id)
       setCarregando(false)
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_evento, nova) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((evento, nova) => {
+      // quem chega pelo link do e-mail "esqueci minha senha" precisa criar uma nova senha
+      if (evento === 'PASSWORD_RECOVERY') setRecuperandoSenha(true)
       setSession(nova)
       if (nova) void buscarPerfil(nova.user.id)
       else setProfile(null)
@@ -51,6 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user: session?.user ?? null,
     profile,
+    recuperandoSenha,
+    finalizarRecuperacao: () => setRecuperandoSenha(false),
     recarregarPerfil: async () => {
       if (session) await buscarPerfil(session.user.id)
     },

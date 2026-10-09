@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { Logo } from '../components/Logo'
 
-type Modo = 'entrar' | 'criar'
+type Modo = 'entrar' | 'criar' | 'esqueci'
 
 function traduzirErro(msg: string): string {
   const m = msg.toLowerCase()
@@ -26,7 +26,11 @@ export default function Login() {
     setErro(null)
     setAviso(null)
     setEnviando(true)
-    if (modo === 'entrar') {
+    if (modo === 'esqueci') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin })
+      if (error) setErro('Não consegui enviar agora. Tente de novo em alguns minutos.')
+      else setAviso('Se esse e-mail tiver uma conta, enviamos um link para criar uma nova senha. Confira também a caixa de spam.')
+    } else if (modo === 'entrar') {
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
       if (error) setErro(traduzirErro(error.message))
     } else {
@@ -74,17 +78,26 @@ export default function Login() {
       <form onSubmit={enviar} className="flex flex-col gap-3">
         <label className="sr-only" htmlFor="email">E-mail</label>
         <input id="email" type="email" required autoComplete="email" inputMode="email" placeholder="Seu e-mail" className="field" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <label className="sr-only" htmlFor="senha">Senha</label>
-        <input id="senha" type="password" required minLength={6} autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} placeholder="Senha (mínimo 6 caracteres)" className="field" value={senha} onChange={(e) => setSenha(e.target.value)} />
+        {modo !== 'esqueci' && (
+          <>
+            <label className="sr-only" htmlFor="senha">Senha</label>
+            <input id="senha" type="password" required minLength={6} autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} placeholder="Senha (mínimo 6 caracteres)" className="field" value={senha} onChange={(e) => setSenha(e.target.value)} />
+          </>
+        )}
         {erro && <p role="alert" className="text-sm text-soft">{erro}</p>}
         {aviso && <p role="status" className="rounded-2xl bg-brand/10 p-3 text-sm">{aviso}</p>}
         <button type="submit" disabled={enviando} className="btn-primary">
-          {enviando ? 'Um instante…' : modo === 'entrar' ? 'Entrar' : 'Criar minha conta'}
+          {enviando ? 'Um instante…' : modo === 'entrar' ? 'Entrar' : modo === 'criar' ? 'Criar minha conta' : 'Enviar link para nova senha'}
         </button>
+        {modo === 'entrar' && (
+          <button type="button" className="btn-ghost !min-h-[44px] !py-2 text-sm" onClick={() => { setModo('esqueci'); setErro(null); setAviso(null) }}>
+            Esqueci minha senha
+          </button>
+        )}
       </form>
 
       <button type="button" className="btn-ghost" onClick={() => { setModo(modo === 'entrar' ? 'criar' : 'entrar'); setErro(null); setAviso(null) }}>
-        {modo === 'entrar' ? 'Ainda não tenho conta' : 'Já tenho conta'}
+        {modo === 'entrar' ? 'Ainda não tenho conta' : modo === 'criar' ? 'Já tenho conta' : 'Voltar para entrar'}
       </button>
 
       <p className="text-center text-xs text-soft">
