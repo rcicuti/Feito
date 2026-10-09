@@ -9,6 +9,7 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
   const [hora, setHora] = useState('')
   const [repeticao, setRepeticao] = useState<Repeticao>('none')
   const [dias, setDias] = useState<number[]>([])
+  const [dificil, setDificil] = useState(false)
   const [passos, setPassos] = useState<string[]>([])
   const [novoPasso, setNovoPasso] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -22,7 +23,7 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
   }
 
   function limpar() {
-    setTitulo(''); setHora(''); setRepeticao('none'); setDias([]); setPassos([]); setNovoPasso(''); setAberto(false); setErro(null)
+    setTitulo(''); setHora(''); setRepeticao('none'); setDias([]); setDificil(false); setPassos([]); setNovoPasso(''); setAberto(false); setErro(null)
   }
 
   async function enviar(e: FormEvent) {
@@ -40,6 +41,7 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
       scheduled_time: hora || null,
       repeat_type: repeticao,
       repeat_days: dias,
+      is_hard: dificil,
       passos: todosPassos,
     })
     setSalvando(false)
@@ -105,6 +107,14 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
               </div>
             )}
           </div>
+
+          <button
+            type="button" role="switch" aria-checked={dificil} onClick={() => setDificil((d) => !d)}
+            className={`flex min-h-[48px] items-center justify-between gap-3 rounded-2xl border px-4 text-left ${dificil ? 'border-brand bg-brand/10' : 'border-line bg-bg'}`}
+          >
+            <span><span className="font-semibold">💪 Difícil pra mim</span><span className="block text-sm text-soft">Vale pontos extras ao concluir</span></span>
+            <span className={`h-6 w-11 shrink-0 rounded-full p-0.5 transition ${dificil ? 'bg-brand' : 'bg-line'}`} aria-hidden><span className={`block h-5 w-5 rounded-full bg-card transition ${dificil ? 'translate-x-5' : ''}`} /></span>
+          </button>
 
           <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold">Dividir em passos pequenos</span>

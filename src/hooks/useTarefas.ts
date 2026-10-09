@@ -8,7 +8,13 @@ export interface NovaTarefa {
   scheduled_time: string | null
   repeat_type: Repeticao
   repeat_days: number[]
+  is_hard: boolean
   passos: string[]
+}
+
+export interface ResultadoConclusao {
+  pontos: number
+  conquistas: string[] // códigos desbloqueados agora
 }
 
 export interface DadosConclusao {
@@ -103,6 +109,7 @@ export function useTarefas(userId: string) {
         scheduled_time: nova.scheduled_time,
         repeat_type: nova.repeat_type,
         repeat_days: nova.repeat_type === 'weekly' ? nova.repeat_days : [],
+        is_hard: nova.is_hard,
         start_date: hojeISO(),
       })
       .select('id')
@@ -118,30 +125,32 @@ export function useTarefas(userId: string) {
     return true
   }
 
-  async function concluir(tarefaId: string, dados: DadosConclusao): Promise<boolean> {
+  async function concluir(tarefaId: string, dados: DadosConclusao): Promise<ResultadoConclusao | null> {
     let photo_path: string | null = null
     if (dados.foto) {
       const caminho = `${userId}/${hojeISO()}-${tarefaId}-${Date.now()}.jpg`
       const { error } = await supabase.storage
         .from(BUCKET_PROVAS)
         .upload(caminho, dados.foto, { contentType: 'image/jpeg', upsert: false })
-      if (error) return false
+      if (error) return null
       photo_path = caminho
     }
-    const { error } = await supabase.from('completions').insert({
+    const { data: nova, error } = await supabase.from('completions').insert({
       user_id: userId,
       task_id: tarefaId,
       completed_on: hojeISO(),
       photo_path,
       caption: dados.legenda.trim() || null,
       visibility: 'private', // nesta etapa só "só eu" funciona
-    })
-    if (error) {
+    }).select('points, created_at').single()
+    if (error || !nova) {
       if (photo_path) await supabase.storage.from(BUCKET_PROVAS).remove([photo_path])
-      return false
+      return null
     }
+    // conquistas desbloqueadas por esta conclusão (mesma transação = mesmo instante)
+    const { data: conq } = await supabase.from('user_achievements').select('code').gte('unlocked_at', nova.created_at)
     await carregar()
-    return true
+    return { pontos: nova.points as number, conquistas: (conq ?? []).map((c) => c.code as string) }
   }
 
   async function alternarPasso(stepId: string) {

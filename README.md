@@ -1,4 +1,4 @@
-# Feito! — Etapa 1 (base e tela Hoje)
+# Feito! — Etapas 1 e 2 (base, tela Hoje, pontos e conquistas)
 
 Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 
@@ -14,7 +14,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 ## Como configurar
 
 1. **Supabase**: crie um projeto em supabase.com.
-2. No **SQL Editor**, cole e rode `supabase/migrations/0001_etapa1_base.sql`.
+2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `supabase/migrations/0002_etapa2_pontos.sql` (cada uma uma vez só).
 3. Em **Project Settings → API**, copie a *Project URL* e a chave *anon public*.
 4. Copie `.env.example` para `.env` e preencha as duas variáveis.
 5. **Login com e-mail**: em *Authentication → URL Configuration*, ponha a URL do app em *Site URL* e em *Redirect URLs* (ex.: `http://localhost:5173` e a URL publicada).
@@ -30,10 +30,18 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
    ```
    Para testar a câmera no celular é preciso HTTPS (use o deploy ou um túnel).
 
+## Etapa 2: pontos, níveis, conquistas e sequência gentil
+- **Pontos** (calculados no banco, não dá para editar): foto 10, sem foto 7, tarefa "Difícil pra mim" +5, e bônus de constância na 1ª tarefa do dia (+1 por dia de sequência anterior, máximo +7).
+- **Níveis** a partir de 30, 90, 180, 300, 450… pontos (os primeiros chegam rápido): Semente, Broto, Muda, Folhas, Botão, Flor, Árvore, Floresta.
+- **13 conquistas** (primeira tarefa, foto, tarefa difícil, recomeço, 10/50/100 tarefas, 3/7/30 dias ativos, sequências de 3/7/14).
+- **Sequência gentil**: se passarem dias em branco, o app oferece "Foi descanso" (sem limite; a sequência continua de onde parou) ou "Vou retomar hoje". Pontos, dias ativos e melhor sequência nunca diminuem. Nunca aparece "0 dias".
+- **Mensagem de reforço específica**: "Você lavou a louça, uma tarefa que estava adiada." (sem conseguir conjugar o verbo, usa "Você concluiu …").
+- Nova tela **Perfil** (nível, sequência, conquistas) e barra de navegação inferior.
+
 ## Privacidade (resumo)
 - Tudo é privado por padrão; a política de INSERT só aceita `visibility = 'private'` nesta etapa.
 - Cada tabela tem RLS: a pessoa só lê/escreve o que é dela.
 - Fotos ficam no bucket privado `provas`, em pasta `<id-da-pessoa>/...`, com política por pasta. Para exibir foto no futuro, use URL assinada (`createSignedUrl`).
 
 ## Ainda não está nesta etapa (de propósito)
-Pontos, níveis e conquistas (Etapa 2); grupos e feed (3); terapeuta (4); notificações, configurações e excluir conta (5).
+Grupos e feed (Etapa 3); terapeuta (4); notificações, configurações e excluir conta (5).

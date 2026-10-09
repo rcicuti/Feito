@@ -3,7 +3,7 @@ import { supabaseConfigurado } from './lib/supabase'
 import ConfigurarSupabase from './pages/ConfigurarSupabase'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
-import Hoje from './pages/Hoje'
+import Principal from './pages/Principal'
 import NovaSenha from './pages/NovaSenha'
 
 export default function App() {
@@ -17,5 +17,5 @@ export default function App() {
   if (!user) return <Login />
   if (profile && !profile.onboarding_done) return <Onboarding />
   if (!profile) return <div className="flex h-full items-center justify-center text-soft">Preparando seu espaço…</div>
-  return <Hoje />
+  return <Principal />
 }

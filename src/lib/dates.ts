@@ -39,3 +39,8 @@ export function dataPorExtenso(): string {
 export function horaCurta(t: string | null): string | null {
   return t ? t.slice(0, 5) : null
 }
+
+export function somarDias(iso: string, n: number): string {
+  const [a, m, d] = iso.split('-').map(Number)
+  return hojeISO(new Date(a, m - 1, d + n))
+}

@@ -2,13 +2,16 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTema } from '../context/ThemeContext'
 import { useTarefas } from '../hooks/useTarefas'
-import { dataPorExtenso, saudacao } from '../lib/dates'
+import type { Progresso } from '../hooks/useProgresso'
+import { dataPorExtenso, hojeISO, saudacao } from '../lib/dates'
+import { conquistaPorCodigo, infoNivel, mensagemReforco, type Conquista } from '../lib/progresso'
 import { Logo } from '../components/Logo'
 import { ProgressRing } from '../components/ProgressRing'
 import { QuickAdd } from '../components/QuickAdd'
 import { TarefaItem } from '../components/TarefaItem'
 import { ConcluirSheet } from '../components/ConcluirSheet'
-import { Celebracao } from '../components/Celebracao'
+import { Celebracao, type DadosCelebracao } from '../components/Celebracao'
+import { CartaoRetomada } from '../components/CartaoRetomada'
 
 function fraseDoAnel(feitas: number, total: number): string {
   if (total === 0) return 'Que tal começar com uma tarefa pequena?'
@@ -17,31 +20,43 @@ function fraseDoAnel(feitas: number, total: number): string {
   return 'Você já está em movimento. Continue no seu ritmo.'
 }
 
-export default function Hoje() {
-  const { user, profile, sair } = useAuth()
+const chaveDispensa = () => `feito-retomada-${hojeISO()}`
+
+export default function Hoje({ progresso, onPerfil }: { progresso: Progresso; onPerfil: () => void }) {
+  const { user, profile } = useAuth()
   const { tema, alternar } = useTema()
   const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
   const [concluindoId, setConcluindoId] = useState<string | null>(null)
-  const [celebrando, setCelebrando] = useState<string | null>(null)
-  const [menuConta, setMenuConta] = useState(false)
+  const [celebrando, setCelebrando] = useState<DadosCelebracao | null>(null)
+  const [dispensado, setDispensado] = useState(() => {
+    try { return localStorage.getItem(chaveDispensa()) === '1' } catch { return false }
+  })
 
   const emConclusao = doDia.find((t) => t.id === concluindoId)
   const nome = profile?.display_name?.split(' ')[0]
+  const resumo = progresso.resumo
+  const nivel = resumo ? infoNivel(resumo.total_points) : null
+  const emBranco = progresso.diasEmBranco.length
+  const mostrarRetomada = emBranco > 0 && !dispensado
+
+  function dispensar() {
+    setDispensado(true)
+    try { localStorage.setItem(chaveDispensa(), '1') } catch { /* tudo bem */ }
+  }
 
   return (
-    <div className="mx-auto flex min-h-full max-w-md flex-col gap-5 px-4 pb-24 pt-5">
-      <header className="flex items-center justify-between">
+    <div className="mx-auto flex min-h-full max-w-md flex-col gap-5 px-4 pb-28 pt-5">
+      <header className="flex items-center justify-between gap-2">
         <Logo />
-        <div className="relative flex gap-1">
+        <div className="flex items-center gap-1">
+          {nivel && (
+            <button className="min-h-[44px] rounded-full bg-brand/15 px-3 text-sm font-bold text-brand" onClick={onPerfil} aria-label={`Nível ${nivel.nivel}, ${nivel.nome}. Abrir perfil`}>
+              🌱 Nível {nivel.nivel}
+            </button>
+          )}
           <button className="h-11 w-11 rounded-full text-xl" onClick={alternar} aria-label={tema === 'escuro' ? 'Usar modo claro' : 'Usar modo escuro'}>
             {tema === 'escuro' ? '☀️' : '🌙'}
           </button>
-          <button className="h-11 w-11 rounded-full text-xl" onClick={() => setMenuConta((m) => !m)} aria-label="Conta" aria-expanded={menuConta}>👤</button>
-          {menuConta && (
-            <div className="absolute right-0 top-12 z-10 w-48 rounded-2xl border border-line bg-card p-2 shadow-lg animate-fade">
-              <button className="btn-ghost w-full !justify-start" onClick={sair}>Sair</button>
-            </div>
-          )}
         </div>
       </header>
 
@@ -53,6 +68,14 @@ export default function Hoje() {
           <p className="mt-1 text-soft">{fraseDoAnel(feitas, total)}</p>
         </div>
       </section>
+
+      {mostrarRetomada && (
+        <CartaoRetomada
+          dias={emBranco}
+          onDescanso={async () => { if (await progresso.marcarDescanso()) dispensar() }}
+          onRetomar={dispensar}
+        />
+      )}
 
       <QuickAdd onCriar={criar} />
 
@@ -94,16 +117,31 @@ export default function Hoje() {
           titulo={emConclusao.title}
           onCancelar={() => setConcluindoId(null)}
           onConfirmar={async (dados) => {
-            const ok = await concluir(emConclusao.id, dados)
-            if (ok) {
-              setConcluindoId(null)
-              setCelebrando(emConclusao.title)
-            }
-            return ok
+            const nivelAntes = infoNivel(resumo?.total_points ?? 0).nivel
+            const retomada = progresso.diasEmBranco.length >= 2
+            const res = await concluir(emConclusao.id, dados)
+            if (!res) return false
+            const novoResumo = await progresso.recarregar()
+            const nivelDepois = infoNivel(novoResumo?.total_points ?? (resumo?.total_points ?? 0) + res.pontos)
+            setConcluindoId(null)
+            setCelebrando({
+              mensagem: mensagemReforco({
+                titulo: emConclusao.title,
+                adiada: emConclusao.repeat_type === 'none' && emConclusao.start_date < hojeISO(),
+                dificil: emConclusao.is_hard,
+                totalPassos: emConclusao.task_steps.length,
+                primeiraDoDia: feitas === 0,
+                retomada,
+              }),
+              pontos: res.pontos,
+              nivelNovo: nivelDepois.nivel > nivelAntes ? { nivel: nivelDepois.nivel, nome: nivelDepois.nome } : null,
+              conquistas: res.conquistas.map(conquistaPorCodigo).filter((c): c is Conquista => Boolean(c)),
+            })
+            return true
           }}
         />
       )}
-      {celebrando && <Celebracao titulo={celebrando} onFim={() => setCelebrando(null)} />}
+      {celebrando && <Celebracao dados={celebrando} onFim={() => setCelebrando(null)} />}
     </div>
   )
 }

@@ -33,6 +33,7 @@ export function TarefaItem({ tarefa: t, onConcluir, onPasso, onAmanha, onTirar }
         <div className="min-w-0 flex-1">
           <p className={`break-words text-lg font-bold leading-snug ${t.feita ? 'line-through decoration-soft/50' : ''}`}>{t.title}</p>
           <p className="flex flex-wrap gap-x-2 text-sm text-soft">
+            {t.is_hard && <span>💪 difícil</span>}
             {hora && <span>🕐 {hora}</span>}
             {t.repeat_type === 'daily' && <span>🔁 todo dia</span>}
             {t.repeat_type === 'weekly' && <span>🔁 semanal</span>}

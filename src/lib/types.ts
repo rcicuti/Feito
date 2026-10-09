@@ -24,6 +24,7 @@ export interface Tarefa {
   repeat_days: number[] // 0 = domingo ... 6 = sábado
   start_date: string // YYYY-MM-DD
   archived_at: string | null
+  is_hard: boolean
   task_steps: Passo[]
 }
 
@@ -34,4 +35,13 @@ export interface Conclusao {
   photo_path: string | null
   caption: string | null
   visibility: Visibilidade
+}
+
+export interface Resumo {
+  total_points: number
+  tarefas_concluidas: number
+  dias_ativos: number
+  sequencia_atual: number
+  melhor_sequencia: number
+  ultimo_dia_coberto: string | null
 }
