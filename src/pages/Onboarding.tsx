@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useTema, PALETAS, type Paleta } from '../context/ThemeContext'
 import { Logo } from '../components/Logo'
 import { idadeEmAnos } from '../lib/dates'
 
@@ -12,6 +13,8 @@ const SLIDES = [
 
 export default function Onboarding() {
   const { user, recarregarPerfil } = useAuth()
+  const { tema, alternar, paleta, escolherPaleta } = useTema()
+  const [escolhendoTema, setEscolhendoTema] = useState(false)
   const [etapa, setEtapa] = useState(0) // 0 = dados básicos; 1..3 = slides
   const [nome, setNome] = useState('')
   const [nascimento, setNascimento] = useState('')
@@ -37,13 +40,43 @@ export default function Onboarding() {
     }
     setSalvando(false)
     if (error) setErro('Não consegui salvar agora. Tente de novo.')
-    else setEtapa(1)
+    else setEscolhendoTema(true)
   }
 
   async function terminar() {
     setSalvando(true)
     await supabase.from('profiles').update({ onboarding_done: true }).eq('id', user!.id)
     await recarregarPerfil()
+  }
+
+  if (escolhendoTema) {
+    return (
+      <main className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-5 p-6">
+        <Logo />
+        <h1 className="text-2xl font-extrabold">Escolha o seu tema</h1>
+        <p className="text-soft">Toque para ver na hora. Você pode mudar isso depois, em <strong>Perfil → Configurações</strong>.</p>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="sr-only">Tema de cores</legend>
+          {(Object.keys(PALETAS) as Paleta[]).map((id) => (
+            <label key={id} className={`flex items-center gap-3 rounded-2xl border p-4 ${paleta === id ? 'border-brand bg-brand/10' : 'border-line bg-card'}`}>
+              <input type="radio" name="paleta" className="h-5 w-5 accent-[rgb(var(--brand))]" checked={paleta === id} onChange={() => escolherPaleta(id)} />
+              <span className="flex shrink-0 overflow-hidden rounded-lg border border-line" aria-hidden>
+                {PALETAS[id].cores[tema].map((c) => <span key={c} className="h-9 w-7" style={{ background: c }} />)}
+              </span>
+              <span>
+                <span className="block font-bold">{PALETAS[id].nome}</span>
+                <span className="block text-sm text-soft">{PALETAS[id].descricao}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        <label className="flex min-h-[48px] items-center gap-3 rounded-2xl border border-line bg-card px-4">
+          <input type="checkbox" className="h-5 w-5 accent-[rgb(var(--brand))]" checked={tema === 'escuro'} onChange={() => alternar()} />
+          <span className="font-semibold">Modo escuro</span>
+        </label>
+        <button className="btn-primary" onClick={() => { setEscolhendoTema(false); setEtapa(1) }}>Continuar</button>
+      </main>
+    )
   }
 
   if (etapa === 0) {
