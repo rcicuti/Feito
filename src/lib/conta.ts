@@ -6,8 +6,9 @@ async function apagarFotos(userId: string): Promise<boolean> {
     const { data, error } = await supabase.storage.from(BUCKET_PROVAS).list(userId, { limit: 100 })
     if (error) return false
     if (!data || data.length === 0) return true
-    const { error: e2 } = await supabase.storage.from(BUCKET_PROVAS).remove(data.map((f) => `${userId}/${f.name}`))
-    if (e2) return false
+    const { data: removidos, error: e2 } = await supabase.storage.from(BUCKET_PROVAS).remove(data.map((f) => `${userId}/${f.name}`))
+    // se o Storage "aceitou" mas não removeu nada (regra de acesso), conta como falha para não excluir a conta com fotos sobrando
+    if (e2 || !removidos || removidos.length === 0) return false
   }
   return false
 }

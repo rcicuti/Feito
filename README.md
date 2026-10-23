@@ -74,3 +74,7 @@ Notificações, configurações e excluir conta (5).
 
 - Duas paletas, cada uma com modo claro e escuro: **Sol + tinta** (padrão) e **Noite + limão**. A pessoa escolhe em Perfil → Configurações → Tema de cores; a escolha fica guardada no aparelho.
 - No código: `data-paleta="sol|limao"` no `<html>` + classe `.dark`; as cores são variáveis em `src/index.css` (`--brand` ação, `--brand-ink` texto sobre a ação, `--brand-fg` marca como texto). O ícone do app instalado é fixo (amarelo sol).
+
+## Fotos ao excluir usuário pelo painel (opcional)
+
+Pelo app, "Excluir minha conta" já apaga as fotos. Se um usuário for apagado direto no Supabase (painel ou SQL), as fotos ficam no Storage. Para automatizar, siga `supabase/opcional/apagar-fotos-automatico.md`.
