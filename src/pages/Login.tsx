@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, URL_DO_SITE } from '../lib/supabase'
 import { Logo } from '../components/Logo'
 
 type Modo = 'entrar' | 'criar' | 'esqueci'
@@ -27,7 +27,7 @@ export default function Login() {
     setAviso(null)
     setEnviando(true)
     if (modo === 'esqueci') {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin })
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: URL_DO_SITE })
       if (error) setErro('Não consegui enviar agora. Tente de novo em alguns minutos.')
       else setAviso('Se esse e-mail tiver uma conta, enviamos um link para criar uma nova senha. Confira também a caixa de spam.')
     } else if (modo === 'entrar') {
@@ -37,7 +37,7 @@ export default function Login() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password: senha,
-        options: { emailRedirectTo: window.location.origin },
+        options: { emailRedirectTo: URL_DO_SITE },
       })
       if (error) setErro(traduzirErro(error.message))
       else if (!data.session) setAviso('Enviamos um link de confirmação para o seu e-mail. Abra e volte aqui.')
@@ -49,7 +49,7 @@ export default function Login() {
     setErro(null)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: URL_DO_SITE },
     })
     if (error) setErro('Não deu para entrar com o Google agora. Tente com e-mail.')
   }

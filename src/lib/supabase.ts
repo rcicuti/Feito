@@ -12,3 +12,7 @@ export const supabase = createClient(url ?? 'http://localhost:54321', key ?? 'se
 })
 
 export const BUCKET_PROVAS = 'provas'
+
+// Endereço público do app usado nos links dos e-mails (confirmar conta, redefinir senha).
+// Se VITE_SITE_URL estiver definido no Vercel, ele é usado; senão, o endereço aberto agora.
+export const URL_DO_SITE: string = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') || window.location.origin
