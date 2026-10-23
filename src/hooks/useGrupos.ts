@@ -30,6 +30,13 @@ export function useGrupos() {
     return { id: data as string }
   }
 
+  async function editar(grupoId: string, nome: string, descricao: string, modo: ModoGrupo): Promise<string | null> {
+    const { error } = await supabase.from('groups').update({ name: nome, description: descricao || null, mode: modo }).eq('id', grupoId)
+    if (error) return 'Não consegui salvar agora. Só quem criou o grupo pode editar.'
+    await recarregar()
+    return null
+  }
+
   async function entrar(codigo: string): Promise<{ id?: string; erro?: string }> {
     const { data, error } = await supabase.rpc('entrar_no_grupo', { p_codigo: codigo })
     if (error) return { erro: mensagemDeErro(error, 'Não consegui entrar agora.') }
@@ -51,5 +58,5 @@ export function useGrupos() {
     return true
   }
 
-  return { grupos, carregando, erro, recarregar, criar, entrar, sair, apagar }
+  return { grupos, carregando, erro, recarregar, criar, editar, entrar, sair, apagar }
 }

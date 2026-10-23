@@ -9,6 +9,7 @@ import { PlacarGrupo } from '../components/grupo/PlacarGrupo'
 import { MembrosGrupo } from '../components/grupo/MembrosGrupo'
 import { ConviteCard } from '../components/grupo/ConviteCard'
 import { QuemEstaFazendo } from '../components/grupo/QuemEstaFazendo'
+import { CriarGrupoSheet } from '../components/grupo/CriarGrupoSheet'
 import { Confirmar } from '../components/grupo/Confirmar'
 
 type Sub = 'feed' | 'placar' | 'desafios' | 'pessoas'
@@ -18,6 +19,7 @@ export default function GrupoDetalhe({ grupoId, estado, agora, onVoltar }: { gru
   const [sub, setSub] = useState<Sub>('feed')
   const [confirmando, setConfirmando] = useState<'sair' | 'apagar' | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+  const [editando, setEditando] = useState(false)
   const g = estado.grupos.find((x) => x.id === grupoId)
   const menor = ehMenor(profile)
 
@@ -52,6 +54,7 @@ export default function GrupoDetalhe({ grupoId, estado, agora, onVoltar }: { gru
         <h1 className="break-words text-2xl font-extrabold">{g.nome}</h1>
         {g.descricao && <p className="break-words text-soft">{g.descricao}</p>}
         <p className="text-sm text-soft">{MODOS[modo].emoji} {MODOS[modo].rotulo} · {g.membros} {g.membros === 1 ? 'pessoa' : 'pessoas'}</p>
+        {souDono && <button className="btn-outline !min-h-[44px] !py-2 mt-1 self-start text-sm" onClick={() => setEditando(true)}>✏️ Editar grupo</button>}
       </header>
       {erro && <p role="alert" className="rounded-2xl bg-card p-4 text-soft">{erro}</p>}
 
@@ -79,6 +82,20 @@ export default function GrupoDetalhe({ grupoId, estado, agora, onVoltar }: { gru
         </div>
       )}
 
+      {editando && (
+        <CriarGrupoSheet
+          inicial={{ nome: g.nome, descricao: g.descricao ?? '', modo }}
+          onFechar={() => setEditando(false)}
+          onCriar={async (nome, descricao, novoModo) => {
+            const e = await estado.editar(g.id, nome, descricao, novoModo)
+            if (!e) {
+              setEditando(false)
+              if (novoModo !== 'competitive' && sub === 'placar') setSub('feed')
+            }
+            return e
+          }}
+        />
+      )}
       {confirmando === 'sair' && (
         <Confirmar titulo="Sair do grupo?" texto="O que você compartilhou aqui deixa de aparecer para o grupo. Para voltar, você precisa de um convite." confirmar="Sair do grupo" onConfirmar={executar} onCancelar={() => setConfirmando(null)} />
       )}

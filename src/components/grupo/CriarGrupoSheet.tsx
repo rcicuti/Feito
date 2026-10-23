@@ -3,14 +3,16 @@ import { MODOS, type ModoGrupo } from '../../lib/grupos'
 import { Folha } from './Folha'
 
 interface Props {
+  inicial?: { nome: string; descricao: string; modo: ModoGrupo } // quando existe, a folha vira "Editar grupo"
   onFechar: () => void
   onCriar: (nome: string, descricao: string, modo: ModoGrupo) => Promise<string | null> // devolve mensagem de erro
 }
 
-export function CriarGrupoSheet({ onFechar, onCriar }: Props) {
-  const [nome, setNome] = useState('')
-  const [descricao, setDescricao] = useState('')
-  const [modo, setModo] = useState<ModoGrupo>('feed_only')
+export function CriarGrupoSheet({ inicial, onFechar, onCriar }: Props) {
+  const editando = Boolean(inicial)
+  const [nome, setNome] = useState(inicial?.nome ?? '')
+  const [descricao, setDescricao] = useState(inicial?.descricao ?? '')
+  const [modo, setModo] = useState<ModoGrupo>(inicial?.modo ?? 'feed_only')
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const valido = nome.trim().length >= 2
@@ -23,7 +25,7 @@ export function CriarGrupoSheet({ onFechar, onCriar }: Props) {
   }
 
   return (
-    <Folha titulo="Criar grupo" onFechar={onFechar}>
+    <Folha titulo={editando ? 'Editar grupo' : 'Criar grupo'} onFechar={onFechar}>
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-semibold">Nome do grupo</span>
         <input className="field" maxLength={60} placeholder="Ex.: Casa em ordem" value={nome} onChange={(e) => setNome(e.target.value)} />
@@ -44,9 +46,13 @@ export function CriarGrupoSheet({ onFechar, onCriar }: Props) {
           </label>
         ))}
       </fieldset>
-      <p className="text-sm text-soft">Só entra no grupo quem tiver o seu convite. Você pode mudar o convite depois.</p>
+      {editando && modo !== inicial?.modo ? (
+        <p className="rounded-2xl bg-card p-3 text-sm text-soft">Mudar o modo vale para todo mundo do grupo, na hora. Nada se perde: pontos e tarefas compartilhadas continuam, só muda o que o grupo mostra (placar, meta ou só o feed).</p>
+      ) : (
+        <p className="text-sm text-soft">{editando ? 'Quem já está no grupo vê as mudanças na hora.' : 'Só entra no grupo quem tiver o seu convite. Você pode mudar o convite depois.'}</p>
+      )}
       {erro && <p role="alert" className="text-sm text-soft">{erro}</p>}
-      <button className="btn-primary" disabled={!valido || enviando} onClick={criar}>{enviando ? 'Criando…' : 'Criar grupo'}</button>
+      <button className="btn-primary" disabled={!valido || enviando} onClick={criar}>{enviando ? (editando ? 'Salvando…' : 'Criando…') : editando ? 'Salvar' : 'Criar grupo'}</button>
     </Folha>
   )
 }
