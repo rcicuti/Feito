@@ -14,7 +14,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 ## Como configurar
 
 1. **Supabase**: crie um projeto em supabase.com.
-2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` `0005_etapa4_terapeuta.sql` e `0006_excluir_conta.sql` (cada uma uma vez só).
+2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` `0005_etapa4_terapeuta.sql` e `0006_excluir_conta.sql` e `0007_placar_do_grupo.sql` (cada uma uma vez só).
 3. Em **Project Settings → API**, copie a *Project URL* e a chave *anon public*.
 4. Copie `.env.example` para `.env` e preencha as duas variáveis.
 5. **Login com e-mail**: em *Authentication → URL Configuration*, ponha a URL do app em *Site URL* e em *Redirect URLs* (ex.: `http://localhost:5173` e a URL publicada).
@@ -78,3 +78,7 @@ Notificações, configurações e excluir conta (5).
 ## Fotos ao excluir usuário pelo painel (opcional)
 
 Pelo app, "Excluir minha conta" já apaga as fotos. Se um usuário for apagado direto no Supabase (painel ou SQL), as fotos ficam no Storage. Para automatizar, siga `supabase/opcional/apagar-fotos-automatico.md`.
+
+## Placar do grupo (modo competitivo)
+
+- Aba **Placar** dentro do grupo competitivo: pontos de cada pessoa na semana, no mês ou sempre, contando só o que foi compartilhado com aquele grupo (SQL 0007). Todos os membros aparecem (quem não compartilhou fica com 0); quem esconde rankings no perfil não vê nem aparece.

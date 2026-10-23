@@ -5,12 +5,13 @@ import type { EstadoAgora } from '../hooks/useComecandoAgora'
 import { MODOS, ehMenor, type ModoGrupo } from '../lib/grupos'
 import { FeedGrupo } from '../components/grupo/FeedGrupo'
 import { DesafiosGrupo } from '../components/grupo/DesafiosGrupo'
+import { PlacarGrupo } from '../components/grupo/PlacarGrupo'
 import { MembrosGrupo } from '../components/grupo/MembrosGrupo'
 import { ConviteCard } from '../components/grupo/ConviteCard'
 import { QuemEstaFazendo } from '../components/grupo/QuemEstaFazendo'
 import { Confirmar } from '../components/grupo/Confirmar'
 
-type Sub = 'feed' | 'desafios' | 'pessoas'
+type Sub = 'feed' | 'placar' | 'desafios' | 'pessoas'
 
 export default function GrupoDetalhe({ grupoId, estado, agora, onVoltar }: { grupoId: string; estado: EstadoGrupos; agora: EstadoAgora; onVoltar: () => void }) {
   const { user, profile } = useAuth()
@@ -30,7 +31,12 @@ export default function GrupoDetalhe({ grupoId, estado, agora, onVoltar }: { gru
   }
   const souDono = g.papel === 'owner'
   const modo = g.modo as ModoGrupo
-  const abas: { id: Sub; rotulo: string }[] = [{ id: 'feed', rotulo: 'Feed' }, { id: 'desafios', rotulo: 'Desafios' }, { id: 'pessoas', rotulo: 'Pessoas' }]
+  const abas: { id: Sub; rotulo: string }[] = [
+    { id: 'feed', rotulo: 'Feed' },
+    ...(modo === 'competitive' ? [{ id: 'placar' as Sub, rotulo: 'Placar' }] : []),
+    { id: 'desafios', rotulo: 'Desafios' },
+    { id: 'pessoas', rotulo: 'Pessoas' },
+  ]
 
   async function executar() {
     const ok = confirmando === 'apagar' ? await estado.apagar(g!.id) : await estado.sair(g!.id, user!.id)
@@ -51,7 +57,7 @@ export default function GrupoDetalhe({ grupoId, estado, agora, onVoltar }: { gru
 
       <QuemEstaFazendo agora={agora} compacto />
 
-      <div role="tablist" className="grid grid-cols-3 gap-1 rounded-2xl bg-card p-1">
+      <div role="tablist" className={`grid gap-1 rounded-2xl bg-card p-1 ${abas.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
         {abas.map((a) => (
           <button key={a.id} role="tab" aria-selected={sub === a.id} onClick={() => setSub(a.id)}
             className={`min-h-[44px] rounded-xl text-sm font-bold ${sub === a.id ? 'bg-brand text-brand-ink' : 'text-soft'}`}>{a.rotulo}</button>
@@ -59,6 +65,7 @@ export default function GrupoDetalhe({ grupoId, estado, agora, onVoltar }: { gru
       </div>
 
       {sub === 'feed' && <FeedGrupo grupoId={g.id} meuId={user!.id} souDono={souDono} menor={menor} />}
+      {sub === 'placar' && <PlacarGrupo grupoId={g.id} />}
       {sub === 'desafios' && <DesafiosGrupo grupoId={g.id} modo={modo} souDono={souDono} meuId={user!.id} />}
       {sub === 'pessoas' && (
         <div className="flex flex-col gap-4">
