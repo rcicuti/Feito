@@ -10,7 +10,7 @@ export interface DadosNivelPopup {
   conquistas: Conquista[]
 }
 
-const CORES = ['#2f9e7a', '#f4b740', '#e07a5f', '#6c8ebf', '#b07cc6']
+const CORES = ['#FFC400', '#B8F200', '#A7A3BD', '#4C6B00', '#8A6400']
 
 // Popup de subida de nível. Não fecha sozinho: só fecha quando a pessoa toca em "Continuar".
 export function NivelPopup({ dados, onFechar }: { dados: DadosNivelPopup; onFechar: () => void }) {
@@ -45,7 +45,7 @@ export function NivelPopup({ dados, onFechar }: { dados: DadosNivelPopup; onFech
 
         <div className="mt-1 flex w-full flex-col gap-2 rounded-2xl bg-bg p-4 text-left">
           <p className="text-sm leading-snug text-soft">{dados.mensagem}</p>
-          <p className="font-extrabold text-brand">+{dados.pontos} pontos</p>
+          <p className="font-extrabold text-brand-fg">+{dados.pontos} pontos</p>
           {dados.conquistas.map((c) => (
             <p key={c.codigo} className="flex items-center gap-2">
               <span className="text-2xl" aria-hidden>{c.emoji}</span>

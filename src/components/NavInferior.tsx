@@ -14,7 +14,7 @@ export function NavInferior({ aba, onMudar, mostrarTerapia = false }: { aba: Aba
           <button
             key={i.id} type="button" onClick={() => onMudar(i.id)}
             aria-current={aba === i.id || (i.id === 'perfil' && aba === 'config') ? 'page' : undefined}
-            className={`flex min-h-[60px] flex-1 flex-col items-center justify-center gap-0.5 text-sm font-bold ${aba === i.id || (i.id === 'perfil' && aba === 'config') ? 'text-brand' : 'text-soft'}`}
+            className={`flex min-h-[60px] flex-1 flex-col items-center justify-center gap-0.5 text-sm font-bold ${aba === i.id || (i.id === 'perfil' && aba === 'config') ? 'text-brand-fg' : 'text-soft'}`}
           >
             <span className="text-xl" aria-hidden>{i.emoji}</span>
             {i.rotulo}

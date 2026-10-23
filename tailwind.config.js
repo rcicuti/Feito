@@ -12,6 +12,7 @@ export default {
         line: 'rgb(var(--line) / <alpha-value>)',
         brand: 'rgb(var(--brand) / <alpha-value>)',
         'brand-ink': 'rgb(var(--brand-ink) / <alpha-value>)',
+        'brand-fg': 'rgb(var(--brand-fg) / <alpha-value>)',
         warm: 'rgb(var(--warm) / <alpha-value>)',
       },
       fontFamily: { sans: ['Nunito', 'system-ui', 'sans-serif'] },

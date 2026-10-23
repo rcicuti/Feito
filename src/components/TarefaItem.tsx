@@ -27,7 +27,7 @@ export function TarefaItem({ tarefa: t, onConcluir, onPasso, onEditar, onAmanha,
           disabled={t.feita}
           aria-label={t.feita ? `${t.title}, feita` : `Concluir ${t.title}`}
           className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 text-2xl font-bold transition active:scale-95 ${
-            t.feita ? 'border-brand bg-brand text-brand-ink' : 'border-brand/60 text-transparent hover:text-brand/40'
+            t.feita ? 'border-brand bg-brand text-brand-ink' : 'border-brand/60 text-transparent hover:text-brand-fg/40'
           }`}
         >
           ✓
@@ -36,7 +36,7 @@ export function TarefaItem({ tarefa: t, onConcluir, onPasso, onEditar, onAmanha,
           <p className={`break-words text-lg font-bold leading-snug ${t.feita ? 'line-through decoration-soft/50' : ''}`}>{t.title}</p>
           <p className="flex flex-wrap gap-x-2 text-sm text-soft">
             {t.is_hard && <span>💪 difícil</span>}
-            {hora && <span>🕐 {hora}</span>}
+            {hora && <span>às {hora}</span>}
             {t.repeat_type === 'daily' && <span>🔁 todo dia</span>}
             {t.repeat_type === 'weekly' && <span>🔁 semanal</span>}
             {passos.length > 0 && <span>{feitos}/{passos.length} passos</span>}

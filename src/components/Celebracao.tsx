@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { Conquista } from '../lib/progresso'
 
-const CORES = ['#2f9e7a', '#f4b740', '#e07a5f', '#6c8ebf', '#b07cc6']
+const CORES = ['#FFC400', '#B8F200', '#A7A3BD', '#4C6B00', '#8A6400']
 
 export interface DadosCelebracao {
   mensagem: string
@@ -30,7 +30,7 @@ export function Celebracao({ dados, onFim }: { dados: DadosCelebracao; onFim: ()
         </div>
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand text-5xl text-brand-ink" aria-hidden>✓</div>
         <p className="text-xl font-extrabold leading-snug">{dados.mensagem}</p>
-        <p className="rounded-full bg-brand/15 px-4 py-1.5 text-lg font-extrabold text-brand">+{dados.pontos} pontos</p>
+        <p className="rounded-full bg-brand/15 px-4 py-1.5 text-lg font-extrabold text-brand-fg">+{dados.pontos} pontos</p>
 
         {dados.conquistas.map((c) => (
           <p key={c.codigo} className="flex items-center gap-2 rounded-2xl bg-bg px-4 py-2 text-left">

@@ -38,7 +38,7 @@ export default function Perfil({ progresso, onConfig }: { progresso: Progresso; 
               <div>
                 <p className="text-sm font-semibold text-soft">Nível {nivel.nivel}</p>
                 <p className="text-2xl font-extrabold leading-tight">{nivel.nome}</p>
-                <p className="font-semibold text-brand">{pontos} pontos</p>
+                <p className="font-semibold text-brand-fg">{pontos} pontos</p>
               </div>
             </div>
             <div

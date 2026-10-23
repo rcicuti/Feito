@@ -65,7 +65,7 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil }:
         <Logo />
         <div className="flex items-center gap-1">
           {nivel && (
-            <button className="min-h-[44px] rounded-full bg-brand/15 px-3 text-sm font-bold text-brand" onClick={onPerfil} aria-label={`Nível ${nivel.nivel}, ${nivel.nome}. Abrir perfil`}>
+            <button className="min-h-[44px] rounded-full bg-brand/15 px-3 text-sm font-bold text-brand-fg" onClick={onPerfil} aria-label={`Nível ${nivel.nivel}, ${nivel.nome}. Abrir perfil`}>
               🌱 Nível {nivel.nivel}
             </button>
           )}

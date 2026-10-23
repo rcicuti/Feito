@@ -3,24 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --bg: 250 247 242;
-  --card: 255 255 255;
-  --ink: 38 45 52;
-  --soft: 107 116 125;
-  --line: 232 226 216;
-  --brand: 47 158 122;
-  --brand-ink: 255 255 255;
-  --warm: 244 183 64;
+  /* Manual de marca v0.2 — modo claro: direção C (Sol + tinta) */
+  --bg: 255 248 224;        /* creme #FFF8E0 */
+  --card: 255 253 245;
+  --ink: 23 19 10;          /* tinta #17130A */
+  --soft: 138 100 0;        /* bronze #8A6400 (texto secundário no claro) */
+  --line: 232 220 170;
+  --brand: 255 196 0;       /* sol #FFC400 (cor de ação) */
+  --brand-ink: 23 19 10;    /* texto/check sobre o sol */
+  --brand-fg: 138 100 0;    /* cor da marca quando vira TEXTO no claro: bronze (o amarelo nunca vira texto) */
+  --warm: 255 196 0;
 }
 .dark {
-  --bg: 20 24 28;
-  --card: 31 37 43;
-  --ink: 238 241 244;
-  --soft: 160 170 180;
-  --line: 52 60 68;
-  --brand: 76 201 160;
-  --brand-ink: 12 30 24;
-  --warm: 246 196 90;
+  /* Manual de marca v0.2 — modo escuro: direção B (Noite + limão) */
+  --bg: 20 18 31;           /* noite #14121F */
+  --card: 35 31 54;         /* grafite roxo #231F36 */
+  --ink: 244 243 250;       /* gelo #F4F3FA */
+  --soft: 167 163 189;      /* lavanda cinza #A7A3BD */
+  --line: 56 51 82;
+  --brand: 184 242 0;       /* limão #B8F200 */
+  --brand-ink: 20 18 31;    /* noite sobre o limão */
+  --brand-fg: 184 242 0;    /* no escuro o limão pode ser texto */
+  --warm: 184 242 0;
 }
 
 html, body, #root { height: 100%; }
