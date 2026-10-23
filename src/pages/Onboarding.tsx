@@ -7,6 +7,8 @@ import { idadeEmAnos } from '../lib/dates'
 
 // "31121990" -> "31/12/1990" (só números; as barras entram sozinhas)
 function mascaraData(v: string): string {
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v.trim()) // preenchimento automático do navegador (AAAA-MM-DD)
+  if (iso) v = `${iso[3]}${iso[2]}${iso[1]}`
   const n = v.replace(/\D/g, '').slice(0, 8)
   if (n.length <= 2) return n
   if (n.length <= 4) return `${n.slice(0, 2)}/${n.slice(2)}`
@@ -44,7 +46,9 @@ export default function Onboarding() {
 
   async function salvarBasico() {
     if (!nascimento) {
-      setErro('Digite sua data de nascimento completa, assim: 31/12/1990. Usamos só para cuidar da sua privacidade.')
+      setErro('Digite sua data de nascimento completa, assim: 31/12/1990.')
+      document.getElementById('campo-nascimento')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      document.getElementById('campo-nascimento')?.focus()
       return
     }
     setErro(null)
@@ -58,7 +62,7 @@ export default function Onboarding() {
       await supabase.rpc('definir_papel_terapeuta', { p_ativo: true, p_crp: crp })
     }
     setSalvando(false)
-    if (error) setErro('Não consegui salvar agora. Tente de novo.')
+    if (error) setErro('Não consegui salvar agora. Confira sua internet e tente de novo.')
     else setEscolhendoTema(true)
   }
 
@@ -110,11 +114,16 @@ export default function Onboarding() {
         <label className="flex flex-col gap-1.5">
           <span className="font-semibold">Data de nascimento</span>
           <input
-            className="field" inputMode="numeric" autoComplete="bday" placeholder="DD/MM/AAAA" maxLength={10}
+            id="campo-nascimento" className="field" inputMode="numeric" autoComplete="off" placeholder="DD/MM/AAAA" maxLength={10}
             value={dataDigitada} onChange={(e) => setDataDigitada(mascaraData(e.target.value))}
           />
-          <span className="text-sm text-soft">Usamos só para proteger menores de idade. Não aparece para ninguém.</span>
+          {dataDigitada.length === 10 && !nascimento ? (
+            <span role="alert" className="text-sm font-semibold text-brand-fg">Essa data não parece certa. Use dia/mês/ano, por exemplo 31/12/1990.</span>
+          ) : (
+            <span className="text-sm text-soft">Dia/mês/ano, por exemplo 31/12/1990. Usamos só para proteger menores de idade. Não aparece para ninguém.</span>
+          )}
         </label>
+        {erro && <p role="alert" className="text-sm font-semibold text-brand-fg">{erro}</p>}
         {nascimento && idadeEmAnos(nascimento) >= 18 && (
           <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-4">
             <label className="flex min-h-[44px] items-start gap-3">
@@ -127,7 +136,6 @@ export default function Onboarding() {
             {terapeuta && <input className="field" maxLength={30} placeholder="CRP (opcional)" value={crp} onChange={(e) => setCrp(e.target.value)} />}
           </div>
         )}
-        {erro && <p role="alert" className="text-sm text-soft">{erro}</p>}
         <button className="btn-primary" disabled={salvando} onClick={salvarBasico}>Continuar</button>
       </main>
     )
