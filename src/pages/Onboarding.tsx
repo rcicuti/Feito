@@ -5,6 +5,24 @@ import { useTema, PALETAS, type Paleta } from '../context/ThemeContext'
 import { Logo } from '../components/Logo'
 import { idadeEmAnos } from '../lib/dates'
 
+// "31121990" -> "31/12/1990" (só números; as barras entram sozinhas)
+function mascaraData(v: string): string {
+  const n = v.replace(/\D/g, '').slice(0, 8)
+  if (n.length <= 2) return n
+  if (n.length <= 4) return `${n.slice(0, 2)}/${n.slice(2)}`
+  return `${n.slice(0, 2)}/${n.slice(2, 4)}/${n.slice(4)}`
+}
+
+// "31/12/1990" -> "1990-12-31"; devolve '' se não for uma data real, no passado e depois de 1900
+function dataParaISO(txt: string): string {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(txt)
+  if (!m) return ''
+  const [d, mes, a] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  const dt = new Date(a, mes - 1, d)
+  if (a < 1900 || dt.getFullYear() !== a || dt.getMonth() !== mes - 1 || dt.getDate() !== d || dt > new Date()) return ''
+  return `${m[3]}-${m[2]}-${m[1]}`
+}
+
 const SLIDES = [
   { emoji: '🌱', titulo: 'Pequenos passos contam', texto: 'Aqui você quebra o dia em tarefas pequenas e reconhece cada uma que fizer. Sem cobrança.' },
   { emoji: '📸', titulo: 'Mostre que está feito', texto: 'Ao concluir, você pode tirar uma foto como “prova” para si mesmo. É opcional: um toque no check também vale.' },
@@ -17,7 +35,8 @@ export default function Onboarding() {
   const [escolhendoTema, setEscolhendoTema] = useState(false)
   const [etapa, setEtapa] = useState(0) // 0 = dados básicos; 1..3 = slides
   const [nome, setNome] = useState('')
-  const [nascimento, setNascimento] = useState('')
+  const [dataDigitada, setDataDigitada] = useState('') // o que a pessoa digita: DD/MM/AAAA
+  const nascimento = dataParaISO(dataDigitada) // AAAA-MM-DD, ou '' se ainda não for uma data válida
   const [terapeuta, setTerapeuta] = useState(false)
   const [crp, setCrp] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -25,7 +44,7 @@ export default function Onboarding() {
 
   async function salvarBasico() {
     if (!nascimento) {
-      setErro('Precisamos da sua data de nascimento para cuidar da sua privacidade.')
+      setErro('Digite sua data de nascimento completa, assim: 31/12/1990. Usamos só para cuidar da sua privacidade.')
       return
     }
     setErro(null)
@@ -90,7 +109,10 @@ export default function Onboarding() {
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="font-semibold">Data de nascimento</span>
-          <input type="date" className="field" value={nascimento} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setNascimento(e.target.value)} />
+          <input
+            className="field" inputMode="numeric" autoComplete="bday" placeholder="DD/MM/AAAA" maxLength={10}
+            value={dataDigitada} onChange={(e) => setDataDigitada(mascaraData(e.target.value))}
+          />
           <span className="text-sm text-soft">Usamos só para proteger menores de idade. Não aparece para ninguém.</span>
         </label>
         {nascimento && idadeEmAnos(nascimento) >= 18 && (
