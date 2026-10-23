@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useTema } from '../context/ThemeContext'
+import { useTema, PALETAS, type Paleta } from '../context/ThemeContext'
 import { usePreferencias } from '../context/PreferenciasContext'
 import type { Progresso } from '../hooks/useProgresso'
 import { tocarConclusao } from '../lib/sons'
@@ -32,7 +32,7 @@ interface Props {
 
 export default function Configuracoes({ progresso, gruposCriados, onVoltar, onTerapia }: Props) {
   const { user, profile, sair } = useAuth()
-  const { tema, alternar } = useTema()
+  const { tema, alternar, paleta, escolherPaleta } = useTema()
   const { prefs, mudar } = usePreferencias()
   const [zerando, setZerando] = useState(false)
   const [confirmandoZerar, setConfirmandoZerar] = useState(false)
@@ -60,7 +60,22 @@ export default function Configuracoes({ progresso, gruposCriados, onVoltar, onTe
 
       <section className="flex flex-col gap-3 rounded-3xl border border-line bg-card p-5" aria-label="Aparência e sons">
         <h2 className="text-lg font-extrabold">Aparência e sons</h2>
-        <Interruptor titulo="Modo escuro" texto="Cores mais suaves para os olhos, principalmente à noite." ligado={tema === 'escuro'} onMudar={() => alternar()} />
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 font-semibold">Tema de cores</legend>
+          {(Object.keys(PALETAS) as Paleta[]).map((id) => (
+            <label key={id} className={`flex items-center gap-3 rounded-2xl border p-3 ${paleta === id ? 'border-brand bg-brand/10' : 'border-line bg-bg'}`}>
+              <input type="radio" name="paleta" className="h-5 w-5 accent-[rgb(var(--brand))]" checked={paleta === id} onChange={() => escolherPaleta(id)} />
+              <span className="flex shrink-0 overflow-hidden rounded-lg border border-line" aria-hidden>
+                {PALETAS[id].cores[tema].map((c) => <span key={c} className="h-8 w-6" style={{ background: c }} />)}
+              </span>
+              <span>
+                <span className="block font-semibold">{PALETAS[id].nome}</span>
+                <span className="block text-sm text-soft">{PALETAS[id].descricao}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        <Interruptor titulo="Modo escuro" texto="Cada tema tem o seu modo claro e o seu modo escuro." ligado={tema === 'escuro'} onMudar={() => alternar()} />
         <Interruptor
           titulo="Reduzir animações"
           texto="Tira confetes, movimentos e transições. Se o seu aparelho já pede menos movimento, o app também respeita."

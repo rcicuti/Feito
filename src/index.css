@@ -2,28 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Manual de marca v0.2 — modo claro: direção C (Sol + tinta) */
+/* Manual de marca v0.2 — duas paletas (temas), cada uma com modo claro e modo escuro.
+   A paleta fica em <html data-paleta="sol|limao"> e o modo escuro na classe .dark.
+   brand = cor de ação · brand-ink = texto sobre a cor de ação · brand-fg = cor da marca quando vira TEXTO. */
+
+/* Sol + tinta · claro (padrão) */
+:root, html[data-paleta="sol"] {
   --bg: 255 248 224;        /* creme #FFF8E0 */
   --card: 255 253 245;
   --ink: 23 19 10;          /* tinta #17130A */
-  --soft: 138 100 0;        /* bronze #8A6400 (texto secundário no claro) */
+  --soft: 138 100 0;        /* bronze #8A6400 */
   --line: 232 220 170;
-  --brand: 255 196 0;       /* sol #FFC400 (cor de ação) */
-  --brand-ink: 23 19 10;    /* texto/check sobre o sol */
-  --brand-fg: 138 100 0;    /* cor da marca quando vira TEXTO no claro: bronze (o amarelo nunca vira texto) */
+  --brand: 255 196 0;       /* sol #FFC400 */
+  --brand-ink: 23 19 10;
+  --brand-fg: 138 100 0;    /* o amarelo nunca vira texto no claro: bronze */
   --warm: 255 196 0;
 }
-.dark {
-  /* Manual de marca v0.2 — modo escuro: direção B (Noite + limão) */
-  --bg: 20 18 31;           /* noite #14121F */
+/* Sol + tinta · escuro */
+html[data-paleta="sol"].dark, :root.dark:not([data-paleta]) {
+  --bg: 23 19 10;           /* tinta */
+  --card: 43 36 16;         /* café escuro #2B2410 */
+  --ink: 255 248 224;       /* creme */
+  --soft: 205 190 138;      /* areia #CDBE8A */
+  --line: 70 60 30;
+  --brand: 255 196 0;
+  --brand-ink: 23 19 10;
+  --brand-fg: 255 196 0;
+  --warm: 255 196 0;
+}
+/* Noite + limão · claro */
+html[data-paleta="limao"] {
+  --bg: 244 243 250;        /* gelo #F4F3FA */
+  --card: 255 255 255;
+  --ink: 20 18 31;          /* noite #14121F */
+  --soft: 94 90 120;
+  --line: 222 220 236;
+  --brand: 184 242 0;       /* limão #B8F200 */
+  --brand-ink: 20 18 31;
+  --brand-fg: 76 107 0;     /* o limão nunca vira texto no claro: verde-oliva #4C6B00 */
+  --warm: 184 242 0;
+}
+/* Noite + limão · escuro */
+html[data-paleta="limao"].dark {
+  --bg: 20 18 31;           /* noite */
   --card: 35 31 54;         /* grafite roxo #231F36 */
-  --ink: 244 243 250;       /* gelo #F4F3FA */
+  --ink: 244 243 250;       /* gelo */
   --soft: 167 163 189;      /* lavanda cinza #A7A3BD */
   --line: 56 51 82;
-  --brand: 184 242 0;       /* limão #B8F200 */
-  --brand-ink: 20 18 31;    /* noite sobre o limão */
-  --brand-fg: 184 242 0;    /* no escuro o limão pode ser texto */
+  --brand: 184 242 0;
+  --brand-ink: 20 18 31;
+  --brand-fg: 184 242 0;
   --warm: 184 242 0;
 }
 

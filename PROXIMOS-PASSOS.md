@@ -17,6 +17,9 @@
 - Exportar os próprios dados (portabilidade, LGPD).
 - Painel simples para ver e tratar as **denúncias** (hoje só no Supabase → Table Editor → `reports`).
 
+- Regra do manual "cor de ação em um único ponto por tela": revisar telas com mais de um botão principal.
+- Ícone do app instalado que acompanhe o tema escolhido (hoje é fixo, amarelo sol).
+
 ## Fora do escopo por enquanto
 Chat em tempo real, videochamada, integração com agenda, relatórios clínicos exportáveis, monetização, loja de recompensas, app nativo nas lojas.
 

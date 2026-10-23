@@ -69,3 +69,8 @@ Notificações, configurações e excluir conta (5).
 - **Excluir conta** (SQL 0006): digita EXCLUIR para confirmar; o app apaga as fotos e depois o login, e o banco apaga tudo em cascata. Grupos criados pela pessoa somem para todos (o app avisa). Se as fotos falharem, nada é excluído.
 - **Reduzir animações**: desliga confetes/movimentos; o app também respeita a configuração do aparelho. **Sons**: som curto e suave ao concluir, desligado por padrão.
 - O que ainda falta da Etapa 5 está em `PROXIMOS-PASSOS.md`.
+
+## Temas de cores (manual de marca v0.2)
+
+- Duas paletas, cada uma com modo claro e escuro: **Sol + tinta** (padrão) e **Noite + limão**. A pessoa escolhe em Perfil → Configurações → Tema de cores; a escolha fica guardada no aparelho.
+- No código: `data-paleta="sol|limao"` no `<html>` + classe `.dark`; as cores são variáveis em `src/index.css` (`--brand` ação, `--brand-ink` texto sobre a ação, `--brand-fg` marca como texto). O ícone do app instalado é fixo (amarelo sol).
