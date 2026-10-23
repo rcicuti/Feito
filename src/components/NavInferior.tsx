@@ -1,4 +1,4 @@
-export type Aba = 'hoje' | 'grupos' | 'terapia' | 'perfil'
+export type Aba = 'hoje' | 'grupos' | 'terapia' | 'perfil' | 'config'
 
 export function NavInferior({ aba, onMudar, mostrarTerapia = false }: { aba: Aba; onMudar: (a: Aba) => void; mostrarTerapia?: boolean }) {
   const itens: { id: Aba; emoji: string; rotulo: string }[] = [
@@ -13,8 +13,8 @@ export function NavInferior({ aba, onMudar, mostrarTerapia = false }: { aba: Aba
         {itens.map((i) => (
           <button
             key={i.id} type="button" onClick={() => onMudar(i.id)}
-            aria-current={aba === i.id ? 'page' : undefined}
-            className={`flex min-h-[60px] flex-1 flex-col items-center justify-center gap-0.5 text-sm font-bold ${aba === i.id ? 'text-brand' : 'text-soft'}`}
+            aria-current={aba === i.id || (i.id === 'perfil' && aba === 'config') ? 'page' : undefined}
+            className={`flex min-h-[60px] flex-1 flex-col items-center justify-center gap-0.5 text-sm font-bold ${aba === i.id || (i.id === 'perfil' && aba === 'config') ? 'text-brand' : 'text-soft'}`}
           >
             <span className="text-xl" aria-hidden>{i.emoji}</span>
             {i.rotulo}

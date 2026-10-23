@@ -34,7 +34,11 @@ button, input, select, textarea { font: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .animate-confetti { display: none !important; }
 }
+/* Mesma coisa quando a pessoa escolhe "Reduzir animações" nas configurações do app */
+.reduzir-animacoes *, .reduzir-animacoes *::before, .reduzir-animacoes *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+.reduzir-animacoes .animate-confetti { display: none !important; }
 
 @layer components {
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3.5 font-bold min-h-[52px] transition active:scale-[.98]; }

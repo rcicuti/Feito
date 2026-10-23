@@ -8,6 +8,7 @@ import Hoje from './Hoje'
 import Perfil from './Perfil'
 import Grupos from './Grupos'
 import Terapia from './Terapia'
+import Configuracoes from './Configuracoes'
 import { useAcompanhamento } from '../hooks/useAcompanhamento'
 import GrupoDetalhe from './GrupoDetalhe'
 
@@ -41,7 +42,8 @@ export default function Principal() {
     <>
       {aba === 'hoje' && <Hoje progresso={progresso} grupos={grupos.grupos} terapeutas={acomp.paraCompartilhar} agora={agora} onPerfil={() => mudarAba('perfil')} />}
       {aba === 'terapia' && <Terapia est={acomp} />}
-      {aba === 'perfil' && <Perfil progresso={progresso} onTerapia={() => mudarAba('terapia')} />}
+      {aba === 'perfil' && <Perfil progresso={progresso} onConfig={() => mudarAba('config')} />}
+      {aba === 'config' && <Configuracoes progresso={progresso} gruposCriados={grupos.grupos.filter((g) => g.papel === 'owner').length} onVoltar={() => mudarAba('perfil')} onTerapia={() => mudarAba('terapia')} />}
       {aba === 'grupos' && (grupoAberto
         ? <GrupoDetalhe grupoId={grupoAberto} estado={grupos} agora={agora} onVoltar={() => setGrupoAberto(null)} />
         : <Grupos estado={grupos} agora={agora} conviteInicial={convite} onConviteTratado={conviteTratado} onAbrir={setGrupoAberto} />)}

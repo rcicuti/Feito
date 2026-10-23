@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { usePreferencias } from '../context/PreferenciasContext'
+import { tocarConclusao } from '../lib/sons'
 import { useTema } from '../context/ThemeContext'
 import { useTarefas } from '../hooks/useTarefas'
 import type { Progresso } from '../hooks/useProgresso'
@@ -32,6 +34,7 @@ const chaveDispensa = () => `feito-retomada-${hojeISO()}`
 export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil }: { progresso: Progresso; grupos: Grupo[]; terapeutas: VinculoTerapeuta[]; agora: EstadoAgora; onPerfil: () => void }) {
   const { user, profile } = useAuth()
   const { tema, alternar } = useTema()
+  const { prefs } = usePreferencias()
   const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
   const [concluindoId, setConcluindoId] = useState<string | null>(null)
   const [editandoId, setEditandoId] = useState<string | null>(null)
@@ -151,6 +154,7 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil }:
             const retomada = progresso.diasEmBranco.length >= 2
             const res = await concluir(emConclusao.id, dados)
             if (!res) return false
+            if (prefs.sons) tocarConclusao()
             const novoResumo = await progresso.recarregar()
             const nivelDepois = infoNivel(novoResumo?.total_points ?? (resumo?.total_points ?? 0) + res.pontos)
             setConcluindoId(null)

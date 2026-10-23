@@ -4,6 +4,7 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { PreferenciasProvider } from './context/PreferenciasContext'
 import './index.css'
 
 registerSW({ immediate: true })
@@ -22,9 +23,11 @@ try {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <PreferenciasProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </PreferenciasProvider>
     </ThemeProvider>
   </StrictMode>,
 )

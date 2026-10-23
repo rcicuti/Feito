@@ -1,4 +1,4 @@
-# Feito! — Etapas 1 a 4 (base, pontos, grupos, terapeuta)
+# Feito! — Etapas 1 a 5 parcial (base, pontos, grupos, terapeuta, configurações)
 
 Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 
@@ -14,7 +14,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 ## Como configurar
 
 1. **Supabase**: crie um projeto em supabase.com.
-2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` e `0005_etapa4_terapeuta.sql` (cada uma uma vez só).
+2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` `0005_etapa4_terapeuta.sql` e `0006_excluir_conta.sql` (cada uma uma vez só).
 3. Em **Project Settings → API**, copie a *Project URL* e a chave *anon public*.
 4. Copie `.env.example` para `.env` e preencha as duas variáveis.
 5. **Login com e-mail**: em *Authentication → URL Configuration*, ponha a URL do app em *Site URL* e em *Redirect URLs* (ex.: `http://localhost:5173` e a URL publicada).
@@ -62,3 +62,10 @@ Notificações, configurações e excluir conta (5).
 - **Duas chaves** por vínculo, que o paciente liga/desliga quando quiser: *tarefas* (só as conclusões marcadas "Meu(minha) terapeuta") e *resumo semanal* (só números). Desligar *tarefas* apaga o que já foi compartilhado.
 - Terapeuta **comenta** nas conclusões compartilhadas e **sugere tarefas**; sugestão só entra na lista se o paciente aceitar. Sem chat.
 - Menores de 18 não se vinculam nem viram terapeutas (fluxo de responsável é futuro).
+
+## Etapa 5 (parte 1): configurações, excluir conta, reduzir animações e sons
+
+- **Perfil → ⚙️ Configurações**: aparência (modo escuro, *Reduzir animações*), *Sons*, privacidade em grupos, perfil de terapeuta, zerar dados e **excluir conta**.
+- **Excluir conta** (SQL 0006): digita EXCLUIR para confirmar; o app apaga as fotos e depois o login, e o banco apaga tudo em cascata. Grupos criados pela pessoa somem para todos (o app avisa). Se as fotos falharem, nada é excluído.
+- **Reduzir animações**: desliga confetes/movimentos; o app também respeita a configuração do aparelho. **Sons**: som curto e suave ao concluir, desligado por padrão.
+- O que ainda falta da Etapa 5 está em `PROXIMOS-PASSOS.md`.
