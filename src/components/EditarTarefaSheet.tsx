@@ -18,9 +18,10 @@ const MIN_PASSOS_DIFICIL = 3
 export function EditarTarefaSheet({ tarefa, onCancelar, onSalvar }: Props) {
   const [titulo, setTitulo] = useState(tarefa.title)
   const [hora, setHora] = useState(tarefa.scheduled_time ? tarefa.scheduled_time.slice(0, 5) : '')
-  const [dificil, setDificil] = useState(tarefa.is_hard)
   const qtdPassos = tarefa.task_steps?.length ?? 0
   const podeMarcar = qtdPassos >= MIN_PASSOS_DIFICIL
+  // difícil só vale com 3 passos ou mais (regra do banco); marcas antigas sem passos suficientes aparecem desligadas
+  const [dificil, setDificil] = useState(tarefa.is_hard && podeMarcar)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 

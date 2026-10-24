@@ -162,7 +162,7 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil }:
             const base = mensagemReforco({
               titulo: emConclusao.title,
               adiada: emConclusao.repeat_type === 'none' && emConclusao.start_date < hojeISO(),
-              dificil: emConclusao.is_hard,
+              dificil: emConclusao.is_hard && emConclusao.task_steps.length >= 3,
               totalPassos: emConclusao.task_steps.length,
               primeiraDoDia: feitas === 0,
               retomada,
