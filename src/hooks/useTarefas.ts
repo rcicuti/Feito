@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase, BUCKET_PROVAS } from '../lib/supabase'
+import { extensaoDaFoto } from '../lib/image'
 import { amanhaISO, diaCurto, hojeISO, somarDias } from '../lib/dates'
 import type { Conclusao, Repeticao, Tarefa, Visibilidade } from '../lib/types'
 
@@ -149,10 +150,10 @@ export function useTarefas(userId: string) {
   async function concluir(tarefaId: string, dados: DadosConclusao): Promise<ResultadoConclusao | null> {
     let photo_path: string | null = null
     if (dados.foto) {
-      const caminho = `${userId}/${hojeISO()}-${tarefaId}-${Date.now()}.jpg`
+      const caminho = `${userId}/${hojeISO()}-${tarefaId}-${Date.now()}.${extensaoDaFoto(dados.foto)}`
       const { error } = await supabase.storage
         .from(BUCKET_PROVAS)
-        .upload(caminho, dados.foto, { contentType: 'image/jpeg', upsert: false })
+        .upload(caminho, dados.foto, { contentType: dados.foto.type === 'image/webp' ? 'image/webp' : 'image/jpeg', upsert: false })
       if (error) return null
       photo_path = caminho
     }
