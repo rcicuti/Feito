@@ -90,3 +90,4 @@ Pelo app, "Excluir minha conta" já apaga as fotos. Se um usuário for apagado d
 - **Tela Hoje:** abas "Hoje" e "Todas a fazer" (as de hoje + as adiadas, futuras e de outros dias da semana, com botão "Fazer hoje").
 - **Cadastro:** botão "Voltar" em todas as telas do passo a passo.
 - **Tema salvo na conta:** o tema de cores e o modo claro/escuro ficam no perfil (SQL 0010) e valem em todos os aparelhos. "Reduzir animações" e "Sons" continuam por aparelho.
+- **Ícone da aba do navegador** muda de cor com o tema (amarelo no Sol + tinta, limão no Noite + limão). O ícone do app instalado (tela inicial do celular) continua fixo, porque é uma imagem definida na instalação.

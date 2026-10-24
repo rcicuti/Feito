@@ -9,6 +9,18 @@ export const PALETAS: Record<Paleta, { nome: string; descricao: string; cores: R
   limao: { nome: 'Noite + limão', descricao: 'Energia de jogo, o escuro de contraste máximo.', cores: { claro: ['#B8F200', '#14121F', '#F4F3FA'], escuro: ['#B8F200', '#231F36', '#14121F'] } },
 }
 
+// Cores do ícone da aba do navegador em cada tema (fundo e traço do check)
+const ICONE: Record<Paleta, { fundo: string; traco: string }> = {
+  sol: { fundo: '#FFC400', traco: '#17130A' },
+  limao: { fundo: '#B8F200', traco: '#14121F' },
+}
+
+function iconeDaAba(p: Paleta): string {
+  const { fundo, traco } = ICONE[p]
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="10" fill="${fundo}"/><path d="M8.2 17.4c1.9 1.5 3.3 3.2 4.5 5.3 2.3-6.6 6.2-11.1 11.3-14.1" fill="none" stroke="${traco}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  return 'data:image/svg+xml,' + encodeURIComponent(svg)
+}
+
 interface Estado { tema: Tema; alternar: () => void; definirTema: (t: Tema) => void; paleta: Paleta; escolherPaleta: (p: Paleta) => void }
 const Ctx = createContext<Estado | null>(null)
 
@@ -36,6 +48,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       /* sem armazenamento local: tudo bem */
     }
+    // ícone da aba do navegador acompanha o tema escolhido
+    let icone = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (!icone) {
+      icone = document.createElement('link')
+      icone.rel = 'icon'
+      document.head.appendChild(icone)
+    }
+    icone.type = 'image/svg+xml'
+    icone.href = iconeDaAba(paleta)
     // cor da barra do navegador acompanha o fundo do tema
     const [r, g, b] = getComputedStyle(html).getPropertyValue('--bg').trim().split(/\s+/).map(Number)
     if ([r, g, b].every((n) => Number.isFinite(n))) {
