@@ -12,6 +12,7 @@ import { ProgressRing } from '../components/ProgressRing'
 import { QuickAdd } from '../components/QuickAdd'
 import { TarefaItem } from '../components/TarefaItem'
 import { ConcluirSheet } from '../components/ConcluirSheet'
+import { TarefaMaisTardeItem } from '../components/TarefaMaisTarde'
 import { EditarTarefaSheet } from '../components/EditarTarefaSheet'
 import { Celebracao, type DadosCelebracao } from '../components/Celebracao'
 import { CartaoRetomada } from '../components/CartaoRetomada'
@@ -35,7 +36,8 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil, o
   const { user, profile } = useAuth()
   const { tema, alternar } = useTema()
   const { prefs } = usePreferencias()
-  const { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, tirarDaLista } = useTarefas(user!.id)
+  const { doDia, maisTarde, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, trazerParaHoje, tirarDaLista } = useTarefas(user!.id)
+  const [vista, setVista] = useState<'hoje' | 'todas'>('hoje')
   const [concluindoId, setConcluindoId] = useState<string | null>(null)
   const [editandoId, setEditandoId] = useState<string | null>(null)
   const [comecandoId, setComecandoId] = useState<string | null>(null)
@@ -46,7 +48,7 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil, o
   })
 
   const emConclusao = doDia.find((t) => t.id === concluindoId)
-  const emEdicao = doDia.find((t) => t.id === editandoId)
+  const emEdicao = doDia.find((t) => t.id === editandoId) ?? maisTarde.find((t) => t.id === editandoId)
   const emComeco = doDia.find((t) => t.id === comecandoId)
   const nome = profile?.display_name?.split(' ')[0]
   const resumo = progresso.resumo
@@ -98,18 +100,30 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil, o
 
       {erro && <p role="alert" className="rounded-2xl bg-card p-4 text-soft">{erro}</p>}
 
-      <main>
+      <div role="tablist" aria-label="Quais tarefas mostrar" className="flex gap-1 rounded-full bg-card p-1 border border-line">
+        {([['hoje', `Hoje (${doDia.length})`], ['todas', `Todas a fazer (${doDia.filter((t) => !t.feita).length + maisTarde.length})`]] as const).map(([id, rotulo]) => (
+          <button
+            key={id} role="tab" aria-selected={vista === id} onClick={() => setVista(id)}
+            className={`min-h-[44px] flex-1 rounded-full px-3 text-sm font-bold ${vista === id ? 'bg-brand text-brand-ink' : 'text-soft'}`}
+          >
+            {rotulo}
+          </button>
+        ))}
+      </div>
+
+      <main className="flex flex-col gap-5">
         {carregando ? (
           <p className="py-8 text-center text-soft">Preparando seu espaço…</p>
-        ) : doDia.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-10 text-center text-soft">
-            <span className="text-5xl" aria-hidden>🌿</span>
-            <p className="text-lg font-semibold text-ink">Nada por aqui ainda.</p>
-            <p>Escreva uma tarefa acima. Pode ser pequenininha.</p>
-          </div>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {doDia.map((t) => (
+        ) : vista === 'hoje' ? (
+          doDia.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-10 text-center text-soft">
+              <span className="text-5xl" aria-hidden>🌿</span>
+              <p className="text-lg font-semibold text-ink">Nada por aqui ainda.</p>
+              <p>Toque em “Adicionar tarefa”. Pode ser pequenininha.</p>
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {doDia.map((t) => (
               <TarefaItem
                 key={t.id}
                 tarefa={t}
@@ -126,8 +140,57 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil, o
                 onTirar={() => void tirarDaLista(t.id)}
                 onComecarAgora={grupos.length > 0 ? () => setComecandoId(t.id) : undefined}
               />
-            ))}
-          </ul>
+              ))}
+            </ul>
+          )
+        ) : (
+          <>
+            <section className="flex flex-col gap-3">
+              <h2 className="text-sm font-extrabold uppercase tracking-wide text-soft">Para hoje</h2>
+              {doDia.filter((t) => !t.feita).length === 0 ? (
+                <p className="text-soft">Nada pendente para hoje. 🌿</p>
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {doDia.filter((t) => !t.feita).map((t) => (
+              <TarefaItem
+                    key={t.id}
+                    tarefa={t}
+                    onConcluir={() => setConcluindoId(t.id)}
+                    onPasso={(id) => {
+                      void alternarPasso(id)
+                      // ao marcar o último passo, convida a concluir a tarefa
+                      const faltam = t.task_steps.filter((p) => !t.passosFeitos.has(p.id) && p.id !== id).length
+                      const estavaFeito = t.passosFeitos.has(id)
+                      if (!estavaFeito && faltam === 0 && t.task_steps.length > 0) setConcluindoId(t.id)
+                    }}
+                    onEditar={() => setEditandoId(t.id)}
+                    onAmanha={() => void remarcarParaAmanha(t.id)}
+                    onTirar={() => void tirarDaLista(t.id)}
+                    onComecarAgora={grupos.length > 0 ? () => setComecandoId(t.id) : undefined}
+                  />
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section className="flex flex-col gap-3">
+              <h2 className="text-sm font-extrabold uppercase tracking-wide text-soft">Mais tarde</h2>
+              {maisTarde.length === 0 ? (
+                <p className="text-soft">Nada marcado para os próximos dias.</p>
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {maisTarde.map((t) => (
+                    <TarefaMaisTardeItem
+                      key={t.id}
+                      tarefa={t}
+                      onTrazer={() => void trazerParaHoje(t.id)}
+                      onEditar={() => setEditandoId(t.id)}
+                      onTirar={() => void tirarDaLista(t.id)}
+                    />
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
         )}
       </main>
 

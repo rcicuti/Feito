@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase, BUCKET_PROVAS } from '../lib/supabase'
-import { amanhaISO, hojeISO } from '../lib/dates'
+import { amanhaISO, diaCurto, hojeISO, somarDias } from '../lib/dates'
 import type { Conclusao, Repeticao, Tarefa, Visibilidade } from '../lib/types'
 
 export interface NovaTarefa {
@@ -33,6 +33,23 @@ export interface TarefaDoDia extends Tarefa {
   passosFeitos: Set<string>
 }
 
+// Tarefa que ainda vai ser feita, mas não é para hoje (adiada, futura ou de outro dia da semana)
+export interface TarefaMaisTarde extends TarefaDoDia {
+  proximaData: string // YYYY-MM-DD
+  quando: string // texto para mostrar
+}
+
+// Próxima data (a partir de "desde") em que a tarefa aparece na lista
+function proximaData(t: Tarefa, desde: string): string {
+  let d = t.start_date > desde ? t.start_date : desde
+  if (t.repeat_type !== 'weekly') return d
+  for (let i = 0; i < 8; i++) {
+    if (t.repeat_days.includes(new Date(d + 'T00:00:00').getDay())) return d
+    d = somarDias(d, 1)
+  }
+  return d
+}
+
 function venceHoje(t: Tarefa, hoje: string): boolean {
   if (t.start_date > hoje) return false
   if (t.repeat_type === 'weekly') return t.repeat_days.includes(new Date(hoje + 'T00:00:00').getDay())
@@ -54,7 +71,6 @@ export function useTarefas(userId: string) {
       .from('tasks')
       .select('*, task_steps(*)')
       .is('archived_at', null)
-      .lte('start_date', dia)
       .order('created_at', { ascending: true })
     if (e1) {
       setErro('Não consegui carregar suas tarefas agora.')
@@ -215,5 +231,23 @@ export function useTarefas(userId: string) {
     await carregar()
   }
 
-  return { doDia, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, tirarDaLista }
+  const maisTarde: TarefaMaisTarde[] = useMemo(() => {
+    const amanha = somarDias(hoje, 1)
+    return tarefas
+      .filter((t) => !venceHoje(t, hoje))
+      .filter((t) => !(t.repeat_type === 'none' && avulsasFeitas.has(t.id)))
+      .map((t) => {
+        const data = proximaData(t, amanha)
+        const quando = data === amanha ? 'Amanhã' : diaCurto(data)
+        return { ...t, feita: false, passosFeitos: passosHoje, proximaData: data, quando }
+      })
+      .sort((a, b) => a.proximaData.localeCompare(b.proximaData) || (a.scheduled_time ?? '99:99').localeCompare(b.scheduled_time ?? '99:99'))
+  }, [tarefas, avulsasFeitas, passosHoje, hoje])
+
+  async function trazerParaHoje(tarefaId: string) {
+    await supabase.from('tasks').update({ start_date: hojeISO() }).eq('id', tarefaId)
+    await carregar()
+  }
+
+  return { doDia, maisTarde, total, feitas, carregando, erro, criar, concluir, alternarPasso, editar, remarcarParaAmanha, trazerParaHoje, tirarDaLista }
 }

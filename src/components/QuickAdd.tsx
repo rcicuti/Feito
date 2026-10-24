@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { DIAS_CURTOS, DIAS_NOMES } from '../lib/dates'
+import { DIAS_CURTOS, DIAS_NOMES, horaParaISO } from '../lib/dates'
+import { CampoHorario } from './CampoHorario'
 import type { Repeticao } from '../lib/types'
 import type { NovaTarefa } from '../hooks/useTarefas'
 
@@ -37,6 +38,11 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
     e.preventDefault()
     const t = titulo.trim()
     if (!t) return
+    const horaISO = horaParaISO(hora)
+    if (horaISO === null) {
+      setErro('Digite o horário assim: 08:30 (ou deixe em branco).')
+      return
+    }
     if (repeticao === 'weekly' && dias.length === 0) {
       setErro('Escolha pelo menos um dia da semana.')
       return
@@ -45,7 +51,7 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
     setSalvando(true)
     const ok = await onCriar({
       title: t,
-      scheduled_time: hora || null,
+      scheduled_time: horaISO || null,
       repeat_type: repeticao,
       repeat_days: dias,
       is_hard: dificilAtivo,
@@ -90,9 +96,9 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
       </label>
 
       <div className="flex flex-col gap-4">
-          <label className="flex items-center gap-3">
-            <span className="w-20 text-sm font-semibold">Horário</span>
-            <input type="time" className="field !min-h-[44px] !py-2" value={hora} onChange={(e) => setHora(e.target.value)} />
+          <label className="flex items-start gap-3">
+            <span className="w-20 pt-2.5 shrink-0 text-sm font-semibold">Horário</span>
+            <CampoHorario className="!min-h-[44px] !py-2" valor={hora} onChange={setHora} />
           </label>
 
           <div className="flex flex-col gap-2">

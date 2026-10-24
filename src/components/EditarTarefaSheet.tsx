@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { TarefaDoDia } from '../hooks/useTarefas'
+import { horaParaISO } from '../lib/dates'
+import { CampoHorario } from './CampoHorario'
 
 export interface DadosEdicao {
   title: string
@@ -32,9 +34,14 @@ export function EditarTarefaSheet({ tarefa, onCancelar, onSalvar }: Props) {
       setErro('A tarefa precisa de um nome.')
       return
     }
+    const horaISO = horaParaISO(hora)
+    if (horaISO === null) {
+      setErro('Digite o horário assim: 08:30 (ou deixe em branco).')
+      return
+    }
     setSalvando(true)
     setErro(null)
-    const ok = await onSalvar({ title: t, scheduled_time: hora || null, is_hard: dificil })
+    const ok = await onSalvar({ title: t, scheduled_time: horaISO || null, is_hard: dificil })
     if (!ok) {
       setSalvando(false)
       setErro('Não consegui salvar agora. Tente de novo.')
@@ -62,7 +69,7 @@ export function EditarTarefaSheet({ tarefa, onCancelar, onSalvar }: Props) {
         <div className="flex flex-col gap-1.5">
           <label htmlFor="editar-hora" className="text-sm font-semibold">Horário <span className="font-normal text-soft">(opcional)</span></label>
           <div className="flex gap-2">
-            <input id="editar-hora" type="time" className="field flex-1" value={hora} onChange={(e) => setHora(e.target.value)} />
+            <div className="flex-1"><CampoHorario id="editar-hora" valor={hora} onChange={setHora} /></div>
             {hora && <button type="button" className="btn-outline !min-h-[52px]" onClick={() => setHora('')}>Limpar</button>}
           </div>
         </div>

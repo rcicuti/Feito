@@ -44,3 +44,26 @@ export function somarDias(iso: string, n: number): string {
   const [a, m, d] = iso.split('-').map(Number)
   return hojeISO(new Date(a, m - 1, d + n))
 }
+
+// "830" -> "08:30" (só números; os dois pontos entram sozinhos)
+export function mascaraHora(v: string): string {
+  let n = v.replace(/\D/g, '')
+  if (n.length > 0 && n[0] > '2') n = '0' + n // "8" vira "08"
+  n = n.slice(0, 4)
+  return n.length <= 2 ? n : `${n.slice(0, 2)}:${n.slice(2)}`
+}
+
+// Texto digitado -> 'HH:MM'; '' se estiver vazio; null se estiver incompleto ou inválido
+export function horaParaISO(txt: string): string | null {
+  if (!txt.trim()) return ''
+  const m = /^(\d{2}):(\d{2})$/.exec(txt.trim())
+  if (!m || Number(m[1]) > 23 || Number(m[2]) > 59) return null
+  return `${m[1]}:${m[2]}`
+}
+
+// "2026-10-29" -> "quinta, 29/10"
+export function diaCurto(iso: string): string {
+  const [a, m, d] = iso.split('-').map(Number)
+  const dt = new Date(a, m - 1, d)
+  return `${DIAS_NOMES[dt.getDay()]}, ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`
+}

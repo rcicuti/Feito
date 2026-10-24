@@ -14,7 +14,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 ## Como configurar
 
 1. **Supabase**: crie um projeto em supabase.com.
-2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` `0005_etapa4_terapeuta.sql` e `0006_excluir_conta.sql` e `0007_placar_do_grupo.sql` e `0008_dificil_com_tres_passos.sql` (cada uma uma vez só).
+2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` `0005_etapa4_terapeuta.sql` e `0006_excluir_conta.sql` e `0007_placar_do_grupo.sql` e `0008_dificil_com_tres_passos.sql` e `0009_editar_comentario.sql` (cada uma uma vez só).
 3. Em **Project Settings → API**, copie a *Project URL* e a chave *anon public*.
 4. Copie `.env.example` para `.env` e preencha as duas variáveis.
 5. **Login com e-mail**: em *Authentication → URL Configuration*, ponha a URL do app em *Site URL* e em *Redirect URLs* (ex.: `http://localhost:5173` e a URL publicada).
@@ -85,3 +85,7 @@ Pelo app, "Excluir minha conta" já apaga as fotos. Se um usuário for apagado d
 
 - **Tarefa difícil** (+5 pontos e a conquista "Enfrentou uma difícil") só vale com **3 passos ou mais**. O app bloqueia a marcação, e o banco também confere na hora de concluir (SQL 0008). Conclusões antigas não mudam.
 - **Adicionar tarefa:** botão "＋ Adicionar tarefa" na tela Hoje abre o formulário completo (nome, horário, repetir, passos, difícil).
+- **Comentários do grupo:** quem escreveu pode **editar** o próprio comentário (só o texto, só adultos); aparece "editado" ao lado (SQL 0009). O dono do grupo continua podendo apagar, mas não editar o comentário dos outros.
+- **Horário** das tarefas é digitado (teclado numérico, 08:30) em vez da roda de seleção.
+- **Tela Hoje:** abas "Hoje" e "Todas a fazer" (as de hoje + as adiadas, futuras e de outros dias da semana, com botão "Fazer hoje").
+- **Cadastro:** botão "Voltar" em todas as telas do passo a passo.

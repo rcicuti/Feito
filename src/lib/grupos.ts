@@ -46,6 +46,7 @@ export interface Comentario {
   criado_em: string
   eh_meu: boolean
   posso_apagar: boolean
+  editado?: boolean // vem do SQL 0009; ausente se o SQL ainda não foi rodado
 }
 
 export interface Membro {

@@ -22,6 +22,8 @@ export function ItemFeedCard({ item, fotoUrl, grupoId, meuId, souDono, menor, on
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const [qtd, setQtd] = useState(item.comentarios)
   const [texto, setTexto] = useState('')
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [textoEdicao, setTextoEdicao] = useState('')
   const [aviso, setAviso] = useState<string | null>(null)
   const [denunciando, setDenunciando] = useState(false)
   const [confirmando, setConfirmando] = useState<'bloquear' | 'descompartilhar' | 'remover' | null>(null)
@@ -66,6 +68,16 @@ export function ItemFeedCard({ item, fotoUrl, grupoId, meuId, souDono, menor, on
     const { error } = await supabase.from('comments').insert({ completion_id: item.completion_id, group_id: grupoId, user_id: meuId, body: t })
     if (error) return setAviso('Não consegui comentar agora.')
     setTexto('')
+    await carregarComentarios()
+  }
+
+  async function salvarEdicao() {
+    const t = textoEdicao.trim()
+    if (!t || !editandoId) return
+    const { data, error } = await supabase.from('comments').update({ body: t }).eq('id', editandoId).select('id')
+    if (error || !data?.length) return setAviso('Não consegui salvar a edição agora. Se isso continuar, falta rodar o SQL 0009 no Supabase.')
+    setEditandoId(null)
+    setAviso(null)
     await carregarComentarios()
   }
 
@@ -148,9 +160,24 @@ export function ItemFeedCard({ item, fotoUrl, grupoId, meuId, souDono, menor, on
         <div className="flex flex-col gap-2 animate-fade">
           {comentarios.map((c) => (
             <div key={c.id} className="rounded-2xl bg-bg px-3 py-2">
-              <p className="text-xs font-bold text-soft">{c.eh_meu ? 'Você' : c.nome} · {tempoRelativo(c.criado_em)}</p>
-              <p className="break-words">{c.texto}</p>
-              {c.posso_apagar && <button className="text-xs text-soft underline min-h-[32px]" onClick={() => void apagarComentario(c.id)}>Apagar</button>}
+              <p className="text-xs font-bold text-soft">{c.eh_meu ? 'Você' : c.nome} · {tempoRelativo(c.criado_em)}{c.editado ? ' · editado' : ''}</p>
+              {editandoId === c.id ? (
+                <form className="mt-1 flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void salvarEdicao() }}>
+                  <input className="field" maxLength={200} aria-label="Editar comentário" autoFocus value={textoEdicao} onChange={(e) => setTextoEdicao(e.target.value)} />
+                  <div className="flex gap-2">
+                    <button className="btn-primary !min-h-[44px] !py-2" type="submit" disabled={!textoEdicao.trim() || textoEdicao.trim() === c.texto}>Salvar</button>
+                    <button className="btn-ghost !min-h-[44px] !py-2" type="button" onClick={() => setEditandoId(null)}>Cancelar</button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <p className="break-words">{c.texto}</p>
+                  <div className="flex gap-3">
+                    {c.eh_meu && !menor && <button className="min-h-[32px] text-xs text-soft underline" onClick={() => { setEditandoId(c.id); setTextoEdicao(c.texto) }}>Editar</button>}
+                    {c.posso_apagar && <button className="min-h-[32px] text-xs text-soft underline" onClick={() => void apagarComentario(c.id)}>Apagar</button>}
+                  </div>
+                </>
+              )}
             </div>
           ))}
           {!menor ? (

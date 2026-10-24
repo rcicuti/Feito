@@ -98,6 +98,7 @@ export default function Onboarding() {
           <span className="font-semibold">Modo escuro</span>
         </label>
         <button className="btn-primary" onClick={() => { setEscolhendoTema(false); setEtapa(1) }}>Continuar</button>
+        <button className="btn-ghost" onClick={() => { setEscolhendoTema(false); setEtapa(0) }}>← Voltar</button>
       </main>
     )
   }
@@ -162,6 +163,7 @@ export default function Onboarding() {
         <button className="btn-primary" disabled={salvando} onClick={() => (ultimo ? terminar() : setEtapa(etapa + 1))}>
           {ultimo ? 'Começar' : 'Próximo'}
         </button>
+        <button className="btn-ghost" disabled={salvando} onClick={() => (etapa === 1 ? setEscolhendoTema(true) : setEtapa(etapa - 1))}>← Voltar</button>
       </div>
     </main>
   )
