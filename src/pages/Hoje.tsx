@@ -31,7 +31,7 @@ function fraseDoAnel(feitas: number, total: number): string {
 
 const chaveDispensa = () => `feito-retomada-${hojeISO()}`
 
-export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil }: { progresso: Progresso; grupos: Grupo[]; terapeutas: VinculoTerapeuta[]; agora: EstadoAgora; onPerfil: () => void }) {
+export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil, onGrupos, onTerapia }: { progresso: Progresso; grupos: Grupo[]; terapeutas: VinculoTerapeuta[]; agora: EstadoAgora; onPerfil: () => void; onGrupos: () => void; onTerapia: () => void }) {
   const { user, profile } = useAuth()
   const { tema, alternar } = useTema()
   const { prefs } = usePreferencias()
@@ -148,6 +148,8 @@ export default function Hoje({ progresso, grupos, terapeutas, agora, onPerfil }:
           titulo={emConclusao.title}
           grupos={grupos}
           terapeutas={terapeutas}
+          onIrParaGrupos={onGrupos}
+          onIrParaTerapia={onTerapia}
           onCancelar={() => setConcluindoId(null)}
           onConfirmar={async (dados) => {
             const nivelAntes = infoNivel(resumo?.total_points ?? 0).nivel

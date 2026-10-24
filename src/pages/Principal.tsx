@@ -40,7 +40,7 @@ export default function Principal() {
 
   return (
     <>
-      {aba === 'hoje' && <Hoje progresso={progresso} grupos={grupos.grupos} terapeutas={acomp.paraCompartilhar} agora={agora} onPerfil={() => mudarAba('perfil')} />}
+      {aba === 'hoje' && <Hoje progresso={progresso} grupos={grupos.grupos} terapeutas={acomp.paraCompartilhar} agora={agora} onPerfil={() => mudarAba('perfil')} onGrupos={() => mudarAba('grupos')} onTerapia={() => mudarAba('terapia')} />}
       {aba === 'terapia' && <Terapia est={acomp} />}
       {aba === 'perfil' && <Perfil progresso={progresso} onConfig={() => mudarAba('config')} />}
       {aba === 'config' && <Configuracoes progresso={progresso} gruposCriados={grupos.grupos.filter((g) => g.papel === 'owner').length} onVoltar={() => mudarAba('perfil')} onTerapia={() => mudarAba('terapia')} />}

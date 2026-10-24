@@ -17,9 +17,12 @@ interface Props {
   terapeutas: VinculoTerapeuta[] // vínculos ativos com a chave "tarefas" ligada
   onCancelar: () => void
   onConfirmar: (d: DadosConclusao) => Promise<boolean>
+  onIrParaGrupos?: () => void
+  onIrParaTerapia?: () => void
 }
 
-export function ConcluirSheet({ titulo, grupos, terapeutas, onCancelar, onConfirmar }: Props) {
+export function ConcluirSheet({ titulo, grupos, terapeutas, onCancelar, onConfirmar, onIrParaGrupos, onIrParaTerapia }: Props) {
+  const [aviso, setAviso] = useState<'group' | 'therapist' | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [foto, setFoto] = useState<Blob | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -101,10 +104,16 @@ export function ConcluirSheet({ titulo, grupos, terapeutas, onCancelar, onConfir
           {OPCOES.map((o) => {
             const ativo = o.valor === 'private' || (o.valor === 'group' && grupos.length > 0) || (o.valor === 'therapist' && terapeutas.length > 0)
             return (
-              <label key={o.valor} className={`flex min-h-[48px] items-center gap-3 rounded-2xl border px-4 ${visibilidade === o.valor ? 'border-brand bg-brand/10' : 'border-line bg-card'} ${ativo ? '' : 'opacity-50'}`}>
-                <input type="radio" name="visibilidade" className="accent-[rgb(var(--brand))]" disabled={!ativo} checked={visibilidade === o.valor} onChange={() => setVisibilidade(o.valor)} />
+              <label key={o.valor} className={`flex min-h-[48px] items-center gap-3 rounded-2xl border px-4 ${visibilidade === o.valor ? 'border-brand bg-brand/10' : 'border-line bg-card'} ${ativo ? '' : 'opacity-60'}`}>
+                <input
+                  type="radio" name="visibilidade" className="accent-[rgb(var(--brand))]"
+                  aria-disabled={!ativo}
+                  checked={visibilidade === o.valor}
+                  onChange={() => { if (ativo) setVisibilidade(o.valor); else setAviso(o.valor === 'group' ? 'group' : 'therapist') }}
+                  onClick={() => { if (!ativo) setAviso(o.valor === 'group' ? 'group' : 'therapist') }}
+                />
                 <span className="flex-1 font-semibold">{o.rotulo}</span>
-                {!ativo && <span className="text-xs text-soft">{o.valor === 'group' ? 'entre em um grupo' : 'vincule em Terapia'}</span>}
+                {!ativo && <span className="text-xs text-soft">toque para saber mais</span>}
               </label>
             )
           })}
@@ -161,6 +170,27 @@ export function ConcluirSheet({ titulo, grupos, terapeutas, onCancelar, onConfir
           )}
         </div>
       </div>
+
+      {aviso && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6 animate-fade" onClick={(e) => { e.stopPropagation(); setAviso(null) }}>
+          <div role="dialog" aria-modal="true" aria-label={aviso === 'group' ? 'Você ainda não está em um grupo' : 'Você ainda não tem terapeuta vinculado'} className="flex w-full max-w-sm flex-col gap-3 rounded-3xl border border-line bg-card p-6 animate-pop" onClick={(e) => e.stopPropagation()}>
+            {aviso === 'group' ? (
+              <>
+                <h2 className="text-xl font-extrabold">Você ainda não está em um grupo</h2>
+                <p className="text-soft">Crie um grupo ou entre em um com um convite para compartilhar suas tarefas com outras pessoas. Você escolhe o que mostrar, e pode parar quando quiser.</p>
+                {onIrParaGrupos && <button className="btn-primary" onClick={onIrParaGrupos}>Ver grupos</button>}
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-extrabold">Você ainda não tem terapeuta vinculado</h2>
+                <p className="text-soft">Se você faz acompanhamento, pode vincular seu(sua) terapeuta com um código para compartilhar tarefas com ele(a). Só depois de você aceitar, e você desliga quando quiser.</p>
+                {onIrParaTerapia && <button className="btn-primary" onClick={onIrParaTerapia}>Ver Terapia</button>}
+              </>
+            )}
+            <button className="btn-ghost" onClick={() => setAviso(null)}>Agora não</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
