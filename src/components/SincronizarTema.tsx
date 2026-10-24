@@ -37,7 +37,10 @@ export function SincronizarTema() {
     }
     if (salvo.current?.tema === tema && salvo.current?.paleta === paleta) return
     salvo.current = { tema, paleta }
-    void supabase.from('profiles').update({ theme_mode: tema, theme_palette: paleta }).eq('id', profile.id)
+    // (a consulta só é enviada quando alguém "espera" o resultado, por isso o .then)
+    supabase.from('profiles').update({ theme_mode: tema, theme_palette: paleta }).eq('id', profile.id).then(({ error }) => {
+      if (error) salvo.current = null // não gravou: tenta de novo na próxima mudança
+    })
   }, [tema, paleta, profile])
 
   return null
