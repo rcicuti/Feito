@@ -9,7 +9,7 @@ export const PALETAS: Record<Paleta, { nome: string; descricao: string; cores: R
   limao: { nome: 'Noite + limão', descricao: 'Energia de jogo, o escuro de contraste máximo.', cores: { claro: ['#B8F200', '#14121F', '#F4F3FA'], escuro: ['#B8F200', '#231F36', '#14121F'] } },
 }
 
-interface Estado { tema: Tema; alternar: () => void; paleta: Paleta; escolherPaleta: (p: Paleta) => void }
+interface Estado { tema: Tema; alternar: () => void; definirTema: (t: Tema) => void; paleta: Paleta; escolherPaleta: (p: Paleta) => void }
 const Ctx = createContext<Estado | null>(null)
 
 function paletaSalva(): Paleta {
@@ -51,7 +51,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [tema, paleta])
 
   return (
-    <Ctx.Provider value={{ tema, alternar: () => setTema((t) => (t === 'claro' ? 'escuro' : 'claro')), paleta, escolherPaleta: setPaleta }}>
+    <Ctx.Provider value={{ tema, alternar: () => setTema((t) => (t === 'claro' ? 'escuro' : 'claro')), definirTema: setTema, paleta, escolherPaleta: setPaleta }}>
       {children}
     </Ctx.Provider>
   )

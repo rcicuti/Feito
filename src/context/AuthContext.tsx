@@ -24,8 +24,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const usuarioAtual = useRef<string | null>(null)
 
   const buscarPerfil = useCallback(async (userId: string) => {
-    // tenta com todas as colunas; se algum SQL (0004/0005) ainda não foi rodado, tenta com menos
+    // tenta com todas as colunas; se algum SQL (0004/0005/0010) ainda não foi rodado, tenta com menos
     const tentativas = [
+      'id, display_name, birth_date, onboarding_done, hide_rankings, is_therapist, crp, theme_palette, theme_mode',
       'id, display_name, birth_date, onboarding_done, hide_rankings, is_therapist, crp',
       'id, display_name, birth_date, onboarding_done, hide_rankings',
       'id, display_name, birth_date, onboarding_done',

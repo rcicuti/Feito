@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import Principal from './pages/Principal'
 import NovaSenha from './pages/NovaSenha'
+import { SincronizarTema } from './components/SincronizarTema'
 
 export default function App() {
   const { carregando, user, profile, recuperandoSenha } = useAuth()
@@ -15,7 +16,12 @@ export default function App() {
   }
   if (recuperandoSenha) return <NovaSenha />
   if (!user) return <Login />
-  if (profile && !profile.onboarding_done) return <Onboarding />
+  if (profile && !profile.onboarding_done) return <><SincronizarTema /><Onboarding /></>
   if (!profile) return <div className="flex h-full items-center justify-center text-soft">Preparando seu espaço…</div>
-  return <Principal />
+  return (
+    <>
+      <SincronizarTema />
+      <Principal />
+    </>
+  )
 }

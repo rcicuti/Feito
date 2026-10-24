@@ -14,7 +14,7 @@ Web app mobile-first (PWA) em React + TypeScript + Tailwind, com Supabase.
 ## Como configurar
 
 1. **Supabase**: crie um projeto em supabase.com.
-2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` `0005_etapa4_terapeuta.sql` e `0006_excluir_conta.sql` e `0007_placar_do_grupo.sql` e `0008_dificil_com_tres_passos.sql` e `0009_editar_comentario.sql` (cada uma uma vez só).
+2. No **SQL Editor**, rode **na ordem**: primeiro `supabase/migrations/0001_etapa1_base.sql`, depois `0002_etapa2_pontos.sql`, `0003_resetar_conta.sql` e `0004_etapa3_grupos.sql` `0005_etapa4_terapeuta.sql` e `0006_excluir_conta.sql` e `0007_placar_do_grupo.sql` e `0008_dificil_com_tres_passos.sql` e `0009_editar_comentario.sql` e `0010_tema_na_conta.sql` (cada uma uma vez só).
 3. Em **Project Settings → API**, copie a *Project URL* e a chave *anon public*.
 4. Copie `.env.example` para `.env` e preencha as duas variáveis.
 5. **Login com e-mail**: em *Authentication → URL Configuration*, ponha a URL do app em *Site URL* e em *Redirect URLs* (ex.: `http://localhost:5173` e a URL publicada).
@@ -89,3 +89,4 @@ Pelo app, "Excluir minha conta" já apaga as fotos. Se um usuário for apagado d
 - **Horário** das tarefas é digitado (teclado numérico, 08:30) em vez da roda de seleção.
 - **Tela Hoje:** abas "Hoje" e "Todas a fazer" (as de hoje + as adiadas, futuras e de outros dias da semana, com botão "Fazer hoje").
 - **Cadastro:** botão "Voltar" em todas as telas do passo a passo.
+- **Tema salvo na conta:** o tema de cores e o modo claro/escuro ficam no perfil (SQL 0010) e valem em todos os aparelhos. "Reduzir animações" e "Sons" continuam por aparelho.

@@ -9,6 +9,8 @@ export interface Profile {
   hide_rankings: boolean
   is_therapist: boolean
   crp: string | null
+  theme_palette?: 'sol' | 'limao' | null // vem do SQL 0010; ausente se ainda não foi rodado
+  theme_mode?: 'claro' | 'escuro' | null
 }
 
 export interface Passo {
