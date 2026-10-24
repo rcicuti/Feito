@@ -13,10 +13,14 @@ interface Props {
   onSalvar: (d: DadosEdicao) => Promise<boolean>
 }
 
+const MIN_PASSOS_DIFICIL = 3
+
 export function EditarTarefaSheet({ tarefa, onCancelar, onSalvar }: Props) {
   const [titulo, setTitulo] = useState(tarefa.title)
   const [hora, setHora] = useState(tarefa.scheduled_time ? tarefa.scheduled_time.slice(0, 5) : '')
   const [dificil, setDificil] = useState(tarefa.is_hard)
+  const qtdPassos = tarefa.task_steps?.length ?? 0
+  const podeMarcar = qtdPassos >= MIN_PASSOS_DIFICIL
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -64,13 +68,17 @@ export function EditarTarefaSheet({ tarefa, onCancelar, onSalvar }: Props) {
 
         <button
           type="button" role="switch" aria-checked={dificil} onClick={() => setDificil((d) => !d)}
-          className={`flex min-h-[56px] items-center justify-between gap-3 rounded-2xl border px-4 text-left ${dificil ? 'border-brand bg-brand/10' : 'border-line bg-card'}`}
+          disabled={!podeMarcar && !dificil}
+          className={`flex min-h-[56px] items-center justify-between gap-3 rounded-2xl border px-4 text-left disabled:opacity-50 ${dificil ? 'border-brand bg-brand/10' : 'border-line bg-card'}`}
         >
           <span><span className="font-semibold">💪 Difícil pra mim</span><span className="block text-sm text-soft">Vale pontos extras ao concluir</span></span>
           <span className={`h-6 w-11 shrink-0 rounded-full p-0.5 transition ${dificil ? 'bg-brand' : 'bg-line'}`} aria-hidden>
             <span className={`block h-5 w-5 rounded-full bg-card transition ${dificil ? 'translate-x-5' : ''}`} />
           </span>
         </button>
+        {!podeMarcar && !dificil && (
+          <p className="-mt-2 px-2 text-sm text-soft">Só dá para marcar como difícil quando a tarefa tem {MIN_PASSOS_DIFICIL} passos ou mais (esta tem {qtdPassos}).</p>
+        )}
 
         {erro && <p role="alert" className="text-sm text-soft">{erro}</p>}
 

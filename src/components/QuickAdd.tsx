@@ -3,6 +3,8 @@ import { DIAS_CURTOS, DIAS_NOMES } from '../lib/dates'
 import type { Repeticao } from '../lib/types'
 import type { NovaTarefa } from '../hooks/useTarefas'
 
+const MIN_PASSOS_DIFICIL = 3
+
 export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<boolean> }) {
   const [titulo, setTitulo] = useState('')
   const [aberto, setAberto] = useState(false)
@@ -21,6 +23,11 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
     setPassos((l) => [...l, p])
     setNovoPasso('')
   }
+
+  const passosContados = passos.length + (novoPasso.trim() ? 1 : 0)
+  const podeDificil = passosContados >= MIN_PASSOS_DIFICIL
+  const dificilAtivo = dificil && podeDificil
+  const faltam = MIN_PASSOS_DIFICIL - passosContados
 
   function limpar() {
     setTitulo(''); setHora(''); setRepeticao('none'); setDias([]); setDificil(false); setPassos([]); setNovoPasso(''); setAberto(false); setErro(null)
@@ -41,7 +48,7 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
       scheduled_time: hora || null,
       repeat_type: repeticao,
       repeat_days: dias,
-      is_hard: dificil,
+      is_hard: dificilAtivo,
       passos: todosPassos,
     })
     setSalvando(false)
@@ -49,29 +56,40 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
     else setErro('Não consegui salvar agora. Tente de novo.')
   }
 
+  if (!aberto) {
+    return (
+      <button
+        type="button"
+        className="btn-primary flex w-full items-center justify-center gap-2"
+        aria-expanded={false}
+        onClick={() => setAberto(true)}
+      >
+        <span aria-hidden className="text-xl leading-none">＋</span> Adicionar tarefa
+      </button>
+    )
+  }
+
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3 rounded-3xl border border-line bg-card p-3 shadow-sm">
-      <div className="flex gap-2">
-        <label className="sr-only" htmlFor="nova-tarefa">Nova tarefa</label>
+    <form onSubmit={enviar} className="flex flex-col gap-4 rounded-3xl border border-line bg-card p-4 shadow-sm animate-fade">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-extrabold">Nova tarefa</h2>
+        <button type="button" className="h-11 w-11 shrink-0 text-xl text-soft" aria-label="Fechar sem salvar" onClick={limpar}>✕</button>
+      </div>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-semibold">O que você vai fazer?</span>
         <input
           id="nova-tarefa"
-          className="field flex-1 border-0 bg-transparent"
-          placeholder="O que você vai fazer?"
+          autoFocus
+          className="field"
+          placeholder="Ex.: arrumar a mochila"
           value={titulo}
           maxLength={200}
           onChange={(e) => setTitulo(e.target.value)}
         />
-        <button type="submit" disabled={!titulo.trim() || salvando} className="btn-primary !px-5 disabled:opacity-40" aria-label="Adicionar tarefa">
-          +
-        </button>
-      </div>
+      </label>
 
-      <button type="button" className="self-start px-2 text-sm font-semibold text-soft" aria-expanded={aberto} onClick={() => setAberto((a) => !a)}>
-        {aberto ? 'Menos opções' : 'Horário, repetir, passos…'}
-      </button>
-
-      {aberto && (
-        <div className="flex flex-col gap-4 px-1 pb-1 animate-fade">
+      <div className="flex flex-col gap-4">
           <label className="flex items-center gap-3">
             <span className="w-20 text-sm font-semibold">Horário</span>
             <input type="time" className="field !min-h-[44px] !py-2" value={hora} onChange={(e) => setHora(e.target.value)} />
@@ -108,14 +126,6 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
             )}
           </div>
 
-          <button
-            type="button" role="switch" aria-checked={dificil} onClick={() => setDificil((d) => !d)}
-            className={`flex min-h-[48px] items-center justify-between gap-3 rounded-2xl border px-4 text-left ${dificil ? 'border-brand bg-brand/10' : 'border-line bg-bg'}`}
-          >
-            <span><span className="font-semibold">💪 Difícil pra mim</span><span className="block text-sm text-soft">Vale pontos extras ao concluir</span></span>
-            <span className={`h-6 w-11 shrink-0 rounded-full p-0.5 transition ${dificil ? 'bg-brand' : 'bg-line'}`} aria-hidden><span className={`block h-5 w-5 rounded-full bg-card transition ${dificil ? 'translate-x-5' : ''}`} /></span>
-          </button>
-
           <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold">Dividir em passos pequenos</span>
             {passos.length > 0 && (
@@ -138,9 +148,34 @@ export function QuickAdd({ onCriar }: { onCriar: (t: NovaTarefa) => Promise<bool
               <button type="button" className="btn-outline !min-h-[44px] !py-2" onClick={adicionarPasso}>Passo</button>
             </div>
           </div>
-        </div>
-      )}
-      {erro && <p role="alert" className="px-2 text-sm text-soft">{erro}</p>}
+
+          <div className="flex flex-col gap-1.5">
+            <button
+              type="button" role="switch" aria-checked={dificilAtivo} aria-disabled={!podeDificil}
+              disabled={!podeDificil}
+              onClick={() => setDificil((d) => !d)}
+              className={`flex min-h-[48px] items-center justify-between gap-3 rounded-2xl border px-4 text-left disabled:opacity-50 ${dificilAtivo ? 'border-brand bg-brand/10' : 'border-line bg-bg'}`}
+            >
+              <span><span className="font-semibold">💪 Difícil pra mim</span><span className="block text-sm text-soft">Vale pontos extras ao concluir</span></span>
+              <span className={`h-6 w-11 shrink-0 rounded-full p-0.5 transition ${dificilAtivo ? 'bg-brand' : 'bg-line'}`} aria-hidden><span className={`block h-5 w-5 rounded-full bg-card transition ${dificilAtivo ? 'translate-x-5' : ''}`} /></span>
+            </button>
+            {!podeDificil && (
+              <p className="px-2 text-sm text-soft">
+                Para marcar como difícil, divida em {MIN_PASSOS_DIFICIL} passos ou mais. {faltam === 1 ? 'Falta 1 passo.' : `Faltam ${faltam} passos.`}
+              </p>
+            )}
+          </div>
+
+      </div>
+
+      {erro && <p role="alert" className="text-sm text-soft">{erro}</p>}
+
+      <div className="flex gap-2">
+        <button type="button" className="btn-outline" onClick={limpar}>Cancelar</button>
+        <button type="submit" disabled={!titulo.trim() || salvando} className="btn-primary flex-1 disabled:opacity-40">
+          {salvando ? 'Salvando…' : 'Adicionar tarefa'}
+        </button>
+      </div>
     </form>
   )
 }
