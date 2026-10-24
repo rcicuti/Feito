@@ -36,11 +36,15 @@ export function SincronizarTema() {
       aplicando.current = null
     }
     if (salvo.current?.tema === tema && salvo.current?.paleta === paleta) return
-    salvo.current = { tema, paleta }
-    // (a consulta só é enviada quando alguém "espera" o resultado, por isso o .then)
-    supabase.from('profiles').update({ theme_mode: tema, theme_palette: paleta }).eq('id', profile.id).then(({ error }) => {
-      if (error) salvo.current = null // não gravou: tenta de novo na próxima mudança
-    })
+    // espera a pessoa parar de mexer: várias trocas seguidas viram um único envio
+    const espera = setTimeout(() => {
+      salvo.current = { tema, paleta }
+      // (a consulta só é enviada quando alguém "espera" o resultado, por isso o .then)
+      supabase.from('profiles').update({ theme_mode: tema, theme_palette: paleta }).eq('id', profile.id).then(({ error }) => {
+        if (error) salvo.current = null // não gravou: tenta de novo na próxima mudança
+      })
+    }, 2000)
+    return () => clearTimeout(espera)
   }, [tema, paleta, profile])
 
   return null
